@@ -1,0 +1,17 @@
+[project]
+name = "home-service-flyio"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "JS",email = "dev@voidst.one"}
+]
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "django (>=6.0.1,<7.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
