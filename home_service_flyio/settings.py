@@ -27,7 +27,6 @@ SECRET_KEY = "django-insecure-*%ix(szg#iyiaq^^nr05gq9v6ckpv4ehao^(_fg%3t8m*e@+#i
 DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split()
-CSRF_TRUSTED_ORIGINS = ['https://home-service-flyio.fly.dev']
 
 # Application definition
 
@@ -45,7 +44,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    #"django.middleware.csrf.CsrfViewMiddleware",# temporarily disable 
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
