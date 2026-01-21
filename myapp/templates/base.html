@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    {% block title %}
+    <title>Home Master</title>
+    {% endblock %}
+</head>
+
+<body>
+    {% block sidebar %}
+    <div class="container">
+        <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+            <a href="/"
+                class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+                <span class="fs-4">Home Master</span>
+            </a>
+            <ul class="nav nav-pills">
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'account_logout' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-primary">Logout</button>
+                </form>
+                {% else %}
+                <a href="{% url 'account_login' %}" class="btn btn-primary me-2">Login</a>
+                <a href="{% url 'account_signup' %}" class="btn btn-outline-primary">Sign Up</a>
+                {% endif %}
+            </ul>
+        </header>
+    </div>
+
+
+    {% endblock %}
+    {% block content %}
+    <!-- default content text (typically empty) -->
+    {% endblock %}
+</body>
+
+{# Load the tag library #}
+{% load django_bootstrap5 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+</html>
