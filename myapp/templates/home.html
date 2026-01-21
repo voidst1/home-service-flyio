@@ -1,0 +1,12 @@
+<nav class="navbar">
+  {% if user.is_authenticated %}
+    <span>Welcome, {{ user.username }}!</span>
+    <form method="post" action="{% url 'account_logout' %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="nav-link btn btn-link">Logout</button>
+    </form>
+  {% else %}
+    <a href="{% url 'account_login' %}" class="nav-link">Login</a>
+    <a href="{% url 'account_signup' %}" class="nav-link">Signup</a>
+  {% endif %}
+</nav>
