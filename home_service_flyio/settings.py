@@ -135,9 +135,9 @@ STATIC_URL = "static/"
 LOGIN_REDIRECT_URL = '/'
 
 # https://docs.allauth.org/en/latest/account/configuration.html
-#ACCOUNT_LOGIN_METHODS = {'email'}
-#ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-#ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
 # skip during testing
 ACCOUNT_EMAIL_VERIFICATION = "none"         # or "optional"/"mandatory"

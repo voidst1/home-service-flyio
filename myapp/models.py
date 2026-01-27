@@ -27,7 +27,13 @@ class Customer(models.Model):
     coordinator = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Best practice
         on_delete=models.PROTECT,
-        related_name='customers'
+        related_name='customers',
+    )
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='customer_profile',
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

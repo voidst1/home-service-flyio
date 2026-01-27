@@ -11,6 +11,7 @@ class CustomerAdmin(admin.ModelAdmin):
     inlines = [AppointmentInline]
     fields = [
         'coordinator',
+        'user',
         'name',
         'phone_number',
         'postal_code',
