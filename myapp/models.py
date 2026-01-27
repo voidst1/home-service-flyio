@@ -24,6 +24,7 @@ class Customer(models.Model):
     unit_number = models.CharField(max_length=10, blank=True)
     frequency = models.CharField(max_length=100)
 
+    # rename to account_manager
     coordinator = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Best practice
         on_delete=models.PROTECT,
@@ -43,6 +44,7 @@ class Customer(models.Model):
         return self.name
     
     def save(self, *args, **kwargs):
+        # https://www.onemap.gov.sg/apidocs/search
         #self.street_name = 'AAAAA'
         super().save(*args, **kwargs)
 
@@ -92,7 +94,7 @@ class Appointment(models.Model):
         return f"{self.customer.coordinator}: {self.worker.name} - {self.customer.name} ({self.start_time})"  
 
     def save(self, *args, **kwargs):
-        seconds = int(self.hours * 3600)
+        seconds = float(self.hours * 3600)
         self.end_time = self.start_time + timedelta(seconds=seconds)
         self.price = self.hours * 20
         super().save(*args, **kwargs)

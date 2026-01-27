@@ -17,10 +17,30 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
-from myapp.views import home_view
+from myapp.views import (
+    home_view,
+    profile_view,
+    book_slot_view,
+
+    bookings_view,
+    bookings_choose_hours_view,
+    bookings_choose_slot_view,
+)
 
 urlpatterns = [
     path('', home_view, name='home'),  # homepage of this app
+    path('profile', profile_view, name='profile'),
+
+    # bookings
+    path('bookings', bookings_view, name='bookings'),
+    path('bookings/choose-hours', bookings_choose_hours_view,
+         name='bookings_choose_hours'),
+    path('bookings/choose-slot', bookings_choose_slot_view,
+         name='bookings_choose_slot'),
+
+    # to remove
+    path('book-slot', book_slot_view, name='book_slot'),
+
     path("admin/", admin.site.urls),
     path('accounts/', include('allauth.urls')),
 ]

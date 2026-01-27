@@ -1,0 +1,36 @@
+{% extends "customer.html" %}
+
+{% block customer %}
+
+
+
+<a type="button" class="btn btn-primary" href="{% url 'bookings_choose_slot' %}?hour=3">+ Book Slot</a>
+
+<h3>Upcoming</h3>
+
+  {{ appointment.price }}
+  {{ appointment.start_time }}
+  {{ appointment.hours }}
+  {{ appointment.status }}
+
+
+
+<div class="row">
+{% for appointment in appointments %}
+
+    <div class="mt-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ appointment.start_time|date:"j M Y (D)" }}</h5>
+                <p class="card-text">{{ appointment.start_time|time:"g:i A" }} - {{ appointment.end_time|time:"g:i A" }}</p>
+                <p class="card-text">${{ appointment.price }}</p>
+            </div>
+        </div>
+    </div>
+
+{% endfor %}
+</div>
+
+
+
+{% endblock %}

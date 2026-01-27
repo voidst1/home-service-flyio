@@ -1,0 +1,26 @@
+{% extends "customer.html" %}
+
+{% block customer %}
+{{ hours }}
+
+
+
+<div class="row">
+{% load crispy_forms_tags %}
+{% for form in forms %}
+
+    <div class="col-sm-3 mt-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ form.start_time|date:"j M Y (D)" }}</h5>
+                <p class="card-text">{{ form.start_time|time:"g:i A" }} - {{ form.end_time|time:"g:i A" }}</p>
+                <p class="card-text">${{ form.price }}</p>
+                {% crispy form %}
+            </div>
+        </div>
+    </div>
+
+{% endfor %}
+</div>
+
+{% endblock %}

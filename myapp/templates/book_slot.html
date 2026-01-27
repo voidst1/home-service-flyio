@@ -1,0 +1,34 @@
+{% extends "customer.html" %}
+
+{% block customer %}
+
+{% load crispy_forms_tags %}
+
+<main class="container-sm">
+
+    <div>
+        Upcoming session
+    </div>
+
+
+    <div class="row">
+        {% for _ in "12345" %}
+        <div class="col-sm-3 mt-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Mon, 26 Jan</h5>
+                    <p class="card-text">08:00 - 12:00</p>
+                    <p class="card-text">$80</p>
+                    <a href="#" class="btn btn-primary">Book</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+
+
+</main>
+
+{% endblock %}
