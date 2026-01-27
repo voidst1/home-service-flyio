@@ -33,3 +33,6 @@ console_command = '/code/manage.py shell'
 [mounts]
   source = "data"
   destination = "/data"
+
+[deploy]
+  release_command = "python manage.py migrate --noinput"
