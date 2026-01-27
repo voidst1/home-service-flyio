@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "django_bootstrap5",
+    "crispy_forms",
+    "crispy_bootstrap5",
     "myapp",
 ]
 
@@ -141,3 +143,6 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
 # skip during testing
 ACCOUNT_EMAIL_VERIFICATION = "none"         # or "optional"/"mandatory"
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
