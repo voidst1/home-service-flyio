@@ -108,9 +108,9 @@ def bookings_choose_hours_view(request):
 @onboarding_required
 def bookings_choose_slot_view(request):
     context = {
-        'profile_exist': does_profile_exist(request.user)
+        'profile_exist': does_profile_exist(request.user),
+        'choices': Appointment.HOURS_CHOICES
     }
-
     if request.method == 'POST':
         customer = request.user.customer_profile
         worker = Worker.objects.all().first()  # temp
@@ -121,7 +121,7 @@ def bookings_choose_slot_view(request):
         # start_time = timezone.now()
         # start_time = datetime.fromtimestamp(ts)
         hours = request.POST.get('hours')
-        hours = int(hours)
+        hours = float(hours)
 
         new_appointment = Appointment(
             start_time=start_time, hours=hours, customer=customer, worker=worker)
@@ -137,7 +137,7 @@ def bookings_choose_slot_view(request):
         hours = request.GET.get('hours')  # validate user input
         if not hours:
             return redirect(default_bookings_choose_slot_url())
-        hours = int(hours)
+        hours = float(hours)
         context['hours'] = hours
 
         # limit get to valid choices
