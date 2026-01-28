@@ -11,10 +11,32 @@ class BookingHoursForm(forms.Form):
         choices = Appointment.HOURS_CHOICES
     )
 
+class NewCustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        exclude = ['coordinator', 'user']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Create Profile'))
+        self.fields['frequency'].label = "How often do you need our service?"
+
+    def save(self, commit=True, user=None):
+        instance = super().save(commit=False)
+        if user:
+            instance.user = user
+            instance.coordinator = user # TODO: add referral code
+        if commit:
+            instance.save()
+        return instance
+
+
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
-        exclude = ['coordinator', 'user', 'created_at']
+        exclude = ['coordinator', 'user'] # check if user can add additional params on their own
         #fields = '__all__' # or ['name', 'email', 'message']
     
     def __init__(self, *args, **kwargs):
@@ -23,23 +45,6 @@ class CustomerForm(forms.ModelForm):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Save Profile'))
         self.fields['frequency'].label = "How often do you need our service?"
-
-    def save(self, commit=True, user=None, customer_id=None):
-        #if customer_id:
-        #    customer = Customer.objects.get(id=customer_id)
-        #    print(customer)
-        #else:
-        
-        instance = super().save(commit=False)
-        if customer_id:
-            instance.id = customer_id
-
-        if user:
-            instance.user = user
-            instance.coordinator = user # TODO: add referral code
-        if commit:
-            instance.save()
-        return instance
 
 class BookSlotForm(forms.Form):
     def __init__(self, start_time, end_time, hours, price, *args, **kwargs):

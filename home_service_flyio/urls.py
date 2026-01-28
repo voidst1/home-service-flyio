@@ -19,6 +19,10 @@ from django.contrib import admin
 from django.urls import include, path
 from myapp.views import (
     home_view,
+
+    onboarding_view,
+    onboarding_profile_view,
+
     profile_view,
     book_slot_view,
 
@@ -29,18 +33,23 @@ from myapp.views import (
 
 urlpatterns = [
     path('', home_view, name='home'),  # homepage of this app
-    path('profile', profile_view, name='profile'),
+
+    # onboarding
+    path('onboarding/', onboarding_view, name='onboarding'),
+    path('onboarding/profile/', onboarding_profile_view, name='onboarding_profile'),
+
+    path('profile/', profile_view, name='profile'),
 
     # bookings
-    path('bookings', bookings_view, name='bookings'),
-    path('bookings/choose-hours', bookings_choose_hours_view,
+    path('bookings/', bookings_view, name='bookings'),
+    path('bookings/choose-hours/', bookings_choose_hours_view,
          name='bookings_choose_hours'),
-    path('bookings/choose-slot', bookings_choose_slot_view,
+    path('bookings/choose-slot/', bookings_choose_slot_view,
          name='bookings_choose_slot'),
 
     # to remove
-    path('book-slot', book_slot_view, name='book_slot'),
+    path('book-slot/', book_slot_view, name='book_slot'),
 
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
 ]

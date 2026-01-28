@@ -1,0 +1,10 @@
+{% extends "customer.html" %}
+
+{% block customer %}
+    <h3>
+        Onboarding: Create your profile
+    </h3>
+
+    {% load crispy_forms_tags %}
+    {% crispy form %}
+{% endblock %}

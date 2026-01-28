@@ -17,13 +17,16 @@ def default_bookings_choose_slot_url():
     params = urlencode({'hours': Appointment.HOURS_CHOICES[0][1]})
     return f'{base_url}?{params}'
 
+
 def home_view(request):
     if request.user.is_authenticated:
-        if does_profile_exist(request.user):
-            print(request.user.customer_profile.name)
-            return redirect('bookings')
-        else:
-            return redirect('profile')
+        return redirect('bookings')
+
+        # if does_profile_exist(request.user):
+        #    print(request.user.customer_profile.name)
+        #    return redirect('bookings')
+        # else:
+        #    return redirect('profile')
 
     return render(request, 'home.html')
 
@@ -34,31 +37,36 @@ def home_view(request):
     #    context['username'] = request.user.username
     # return render(request, 'home.html', context)
 
-# TODO: seperate the create out, and change this to edit
 
+def onboarding_view(request):
+    return redirect('onboarding_profile')
 
+def onboarding_profile_view(request):
+    if request.method == 'POST':
+        form = CustomerForm(request.POST)
+        if form.is_valid():
+            form.save(user=request.user)
+            # messages.info(request, "You may now start booking")
+            return redirect('home')
+    else:
+        form = CustomerForm()
+
+    return render(request, 'onboarding_profile.html', {'form': form})
+
+@onboarding_required
 def profile_view(request):
-    context = {
+    context = { # see if this can be removed
         'profile_exist': does_profile_exist(request.user)
     }
 
     if request.method == 'POST':
-        form = CustomerForm(request.POST)
+        form = CustomerForm(request.POST, instance=request.user.customer_profile)
+        print(form.data)
         if form.is_valid():
-            customer_id = request.user.customer_profile.id
-            form.save(user=request.user, customer_id=customer_id)
-            context['form'] = form
-            if not customer_id:
-                # messages.info(request, "You may now start booking")
-                return redirect('bookings')
-            # else:
-            # messages.info(request, "Profile Updated")
-
+            form.save()
+            messages.info(request, "Profile Updated")
     else:
-        if does_profile_exist(request.user):
-            form = CustomerForm(instance=request.user.customer_profile)
-        else:
-            form = CustomerForm()
+        form = CustomerForm(instance=request.user.customer_profile)
 
     context['form'] = form
     return render(request, 'profile.html', context)

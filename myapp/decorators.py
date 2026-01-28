@@ -10,6 +10,6 @@ def onboarding_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
         if not does_profile_exist(request.user):
             messages.info(request, "Please complete your onboarding first.")
-            return redirect('profile')
+            return redirect('onboarding')
         return view_func(request, *args, **kwargs)
     return _wrapped_view
