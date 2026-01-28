@@ -3,7 +3,7 @@ import time
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.utils import timezone
-from .forms import CustomerForm, BookSlotForm
+from .forms import CustomerForm, BookSlotForm, NewCustomerForm
 from .models import Appointment, Worker
 from .decorators import onboarding_required
 from .utils import does_profile_exist
@@ -43,13 +43,13 @@ def onboarding_view(request):
 
 def onboarding_profile_view(request):
     if request.method == 'POST':
-        form = CustomerForm(request.POST)
+        form = NewCustomerForm(request.POST)
         if form.is_valid():
             form.save(user=request.user)
             # messages.info(request, "You may now start booking")
             return redirect('home')
     else:
-        form = CustomerForm()
+        form = NewCustomerForm()
 
     return render(request, 'onboarding_profile.html', {'form': form})
 
