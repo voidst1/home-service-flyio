@@ -155,20 +155,20 @@ def bookings_choose_slot_view(request):
             {
                 'start_time': today_8am,
                 'end_time': today_8am + timedelta(hours=hours),
-                'hours': 3,
-                'price': 60,
+                'hours': hours,
+                'price': hours * 20,
             },
             {
                 'start_time': today_10am,
                 'end_time': today_10am + timedelta(hours=hours),
-                'hours': 3,
-                'price': 60,
+                'hours': hours,
+                'price': hours * 20,
             },
             {
                 'start_time': today_3pm,
                 'end_time': today_3pm + timedelta(hours=hours),
-                'hours': 3,
-                'price': 60,
+                'hours': hours,
+                'price': hours * 20,
             },
         ]
 
