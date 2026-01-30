@@ -145,3 +145,24 @@ class Appointment(models.Model):
         super().save(*args, **kwargs)
 
     
+class TrainStation(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class TrainStationExit(models.Model):
+    train_station = models.ForeignKey(TrainStation, on_delete=models.PROTECT) 
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=False, null=False) # Latitude always falls between -90 and +90 degrees
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=False, null=False) # Longitude spans -180 to +180 degrees
+
+    def __str__(self):
+        return f'{self.train_station.name}, ({self.latitude}, {self.longitude})'
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['train_station', 'latitude', 'longitude'],
+                name='unique_train_station_latitude_longitude'
+            )
+        ]

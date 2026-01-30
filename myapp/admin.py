@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Customer, PostalCode, Worker, Appointment
+from .models import Customer, PostalCode, TrainStation, TrainStationExit, Worker, Appointment
 
 class AppointmentInline(admin.TabularInline):
     model = Appointment
@@ -34,6 +34,34 @@ class AppointmentAdmin(admin.ModelAdmin):
 @admin.register(PostalCode)
 class PostalCodeAdmin(admin.ModelAdmin):
     readonly_fields=('block_number','road_name','building','address','x','y','latitude','longitude')
+
+    # Disable editing of existing entries
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    # Disable deletion
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class TrainStationExitInline(admin.TabularInline):
+    model = TrainStationExit
+
+@admin.register(TrainStation)
+class TrainStationAdmin(admin.ModelAdmin):
+    readonly_fields = ['name']
+    inlines = [TrainStationExitInline]
+
+    # Disable editing of existing entries
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    # Disable deletion
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+@admin.register(TrainStationExit)
+class TrainStationAdmin(admin.ModelAdmin):
+    readonly_fields = ['latitude', 'longitude']
 
     # Disable editing of existing entries
     def has_change_permission(self, request, obj=None):
