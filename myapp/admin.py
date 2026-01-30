@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Customer, Worker, Appointment
+from .models import Customer, PostalCode, Worker, Appointment
 
 class AppointmentInline(admin.TabularInline):
     model = Appointment
@@ -14,12 +14,13 @@ class CustomerAdmin(admin.ModelAdmin):
         'user',
         'name',
         'phone_number',
-        'postal_code',
-        'street_name',
+        'road_name',
         'unit_number',
+        'postal_code',
+        'address',
         'frequency',
     ]
-    readonly_fields = ['street_name']
+    readonly_fields = ['road_name','address']
 
 @admin.register(Worker)
 class WorkerAdmin(admin.ModelAdmin):
@@ -30,3 +31,14 @@ class AppointmentAdmin(admin.ModelAdmin):
     fields = ['customer','worker','status','hours','price','commission','start_time','end_time']
     readonly_fields = ['end_time', 'price', 'commission']
 
+@admin.register(PostalCode)
+class PostalCodeAdmin(admin.ModelAdmin):
+    readonly_fields=('block_number','road_name','building','address','x','y','latitude','longitude')
+
+    # Disable editing of existing entries
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    # Disable deletion
+    def has_delete_permission(self, request, obj=None):
+        return False

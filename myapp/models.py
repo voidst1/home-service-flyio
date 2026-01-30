@@ -1,8 +1,10 @@
 import re
 from datetime import timedelta
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
+
+from myapp.utils import get_postal_code_info, validate_postal_code
 
 class Worker(models.Model):
     name = models.CharField(max_length=100)
@@ -12,17 +14,61 @@ class Worker(models.Model):
     def __str__(self):
         return self.name
 
-def validate_postal_code(value):
-    if not re.match(r'^\d{6}$', value):
-        raise ValidationError('Enter a valid SG postal code (6 digits)')
+class PostalCode(models.Model):
+    name = models.CharField(max_length=6, primary_key=True, validators=[validate_postal_code])
+    block_number = models.CharField(max_length=10) # BLK_NO
+    road_name = models.CharField(max_length=100, blank=False, null=False) # ROAD_NAME
+    building = models.CharField(max_length=100) # BUILDING
+    address = models.CharField(max_length=200, blank=False, null=False) # ADDRESS
+    x = models.DecimalField(max_digits=15, decimal_places=10,blank=False, null=False) # X
+    y = models.DecimalField(max_digits=15, decimal_places=10,blank=False, null=False) # Y
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=False, null=False) # LATITUDE
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=False, null=False) # LONGITUDE
+
+    def __str__(self):
+        return self.name
+    
+    def clean(self):
+        all_fields = [f.name for f in self._meta.fields]
+        self.clean_fields(exclude=[f for f in all_fields if f not in ['name']])
+
+        postal_code_result = get_postal_code_info(self.name)
+        # print(postal_code_result)
+
+        if isinstance(postal_code_result, str): # if error message string returned
+            raise ValidationError({
+                'name': 'Server error, please try again.'
+            })
+        elif postal_code_result['found'] == 0:
+            raise ValidationError({
+                'name': 'Invalid postal code'
+            })
+        else:
+            result = postal_code_result['results'][0]
+            self.block_number = result['BLK_NO']
+            self.road_name = result['ROAD_NAME']
+            self.building = result['BUILDING']
+            self.address = result['ADDRESS']
+            self.x = result['X']
+            self.y = result['Y']
+            self.latitude = result['LATITUDE']
+            self.longitude = result['LONGITUDE']
+
 
 class Customer(models.Model):
     name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=100)
-    postal_code = models.CharField(max_length=6, validators=[validate_postal_code]) # some has leading 0
-    street_name = models.CharField(max_length=200)
+    postal_code = models.ForeignKey(PostalCode, on_delete=models.PROTECT) 
     unit_number = models.CharField(max_length=10, blank=True)
     frequency = models.CharField(max_length=100)
+
+    @property
+    def road_name(self):
+        return " ".join([self.postal_code.block_number, self.postal_code.road_name])
+
+    @property
+    def address(self):
+        return self.postal_code.address
 
     # rename to account_manager
     coordinator = models.ForeignKey(
@@ -45,7 +91,6 @@ class Customer(models.Model):
     
     def save(self, *args, **kwargs):
         # https://www.onemap.gov.sg/apidocs/search
-        #self.street_name = 'AAAAA'
         super().save(*args, **kwargs)
 
 class Appointment(models.Model):

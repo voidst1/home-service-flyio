@@ -1,10 +1,11 @@
 from django import forms
+
 from .models import Customer, Appointment
 from crispy_forms.layout import Submit, Layout, Hidden
 from crispy_forms.helper import FormHelper
 from django.core import serializers
-
-from .models import Appointment
+from django.core.exceptions import ValidationError
+from .utils import get_postal_code_info
 
 class BookingHoursForm(forms.Form):
     hours = forms.ChoiceField(
@@ -25,6 +26,7 @@ class NewCustomerForm(forms.ModelForm):
 
     def save(self, commit=True, user=None):
         instance = super().save(commit=False)
+
         if user:
             instance.user = user
             instance.coordinator = user # TODO: add referral code
