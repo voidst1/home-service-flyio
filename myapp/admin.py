@@ -45,6 +45,7 @@ class AppointmentAdmin(admin.ModelAdmin):
 
 @admin.register(PostalCode)
 class PostalCodeAdmin(admin.ModelAdmin):
+    list_display = ('name','address')
     read_only_fields = [field.name for field in PostalCode._meta.fields]
     inlines = [TrainStationPostalCodeDistanceInline]
 
