@@ -5,6 +5,18 @@ from .models import AssignedLocation, Customer, PostalCode, TrainStation, TrainS
 class AppointmentInline(admin.TabularInline):
     model = Appointment
 
+class TrainStationPostalCodeDistanceInline(admin.TabularInline):
+    model = TrainStationPostalCodeDistance
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+        
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 # Register your models here.
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
@@ -35,9 +47,11 @@ class AppointmentAdmin(admin.ModelAdmin):
 class PostalCodeAdmin(admin.ModelAdmin):
     readonly_fields=('block_number','road_name','building','address','x','y','latitude','longitude')
 
+    inlines = [TrainStationPostalCodeDistanceInline]
+
     # Disable editing of existing entries
-    def has_change_permission(self, request, obj=None):
-        return False
+    #def has_change_permission(self, request, obj=None):
+    #    return False
 
     # Disable deletion
     def has_delete_permission(self, request, obj=None):
