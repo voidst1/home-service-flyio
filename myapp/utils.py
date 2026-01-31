@@ -2,6 +2,8 @@ import re
 from django.core.exceptions import ValidationError
 import httpx
 
+from haversine import haversine, Unit
+
 def does_profile_exist(user):
     return hasattr(user, 'customer_profile')
 
@@ -30,3 +32,6 @@ def get_postal_code_info(postal_code):
 
     return o
 
+# in float
+def get_distance_km(lat1, long1, lat2, long2):
+    return haversine((lat1, long1), (lat2, long2), unit=Unit.KILOMETERS)

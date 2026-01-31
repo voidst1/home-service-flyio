@@ -1,10 +1,12 @@
 import re
 from datetime import timedelta
-from django.db import models
+import sys
+from django.db import models, transaction
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db.models import Prefetch
 
-from myapp.utils import get_postal_code_info, validate_postal_code
+from myapp.utils import get_distance_km, get_postal_code_info, validate_postal_code
 
 class Worker(models.Model):
     name = models.CharField(max_length=100)
@@ -53,6 +55,40 @@ class PostalCode(models.Model):
             self.y = result['Y']
             self.latitude = result['LATITUDE']
             self.longitude = result['LONGITUDE']
+
+
+    def save(self, *args, **kwargs):
+        is_new_state = self._state.adding
+        super().save(*args, **kwargs)
+            
+        if is_new_state:
+        #if True:
+            new_records = self.get_train_stations_within_distance_km(float(self.latitude), float(self.longitude))
+            TrainStationPostalCodeDistance.objects.bulk_create(new_records)
+
+    def get_train_stations_within_distance_km(self, lat, long, max_distance=3):
+        train_stations = TrainStation.objects.prefetch_related('train_station_exits').all()
+        new_records = []
+        for train_station in train_stations:
+            #print(f"Processing {train_station.name}")
+            shortest_distance = sys.float_info.max
+            for train_station_exit in train_station.train_station_exits.all():
+                #print(f"Processing {train_station_exit}")
+                distance = get_distance_km(lat, long, train_station_exit.latitude, train_station_exit.longitude)
+                if distance < shortest_distance:
+                    shortest_distance = distance
+                #print(f"Distance: {distance}")
+            #print(f"Shortest Distance: {shortest_distance}")
+
+            # add if within threshold
+            if shortest_distance <= max_distance:
+                train_station_postal_code_distance = TrainStationPostalCodeDistance(
+                    train_station=train_station,
+                    postal_code=self,
+                    distance=shortest_distance
+                )
+                new_records.append(train_station_postal_code_distance)
+        return new_records
 
 
 class Customer(models.Model):
@@ -166,3 +202,20 @@ class TrainStationExit(models.Model):
                 name='unique_train_station_latitude_longitude'
             )
         ]
+
+class AssignedLocation(models.Model):
+    worker = models.ForeignKey(Worker, on_delete=models.PROTECT)
+    train_station = models.ForeignKey(TrainStation, on_delete=models.PROTECT) 
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+
+    def __str__(self):
+        return f'{self.worker.name}-{self.train_station.name} {self.start_time.strftime("%Y-%m-%d")} ({self.start_time.strftime("%I:%M %p")}-{self.end_time.strftime("%I:%M %p")})'
+
+class TrainStationPostalCodeDistance(models.Model):
+    train_station = models.ForeignKey(TrainStation, on_delete=models.PROTECT)
+    postal_code = models.ForeignKey(PostalCode, on_delete=models.PROTECT)
+    distance = models.FloatField(blank=False, null=False)
+
+    def __str__(self):
+        return f'{self.postal_code}-{self.train_station}-{self.distance:.2f}km'

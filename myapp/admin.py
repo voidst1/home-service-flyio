@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Customer, PostalCode, TrainStation, TrainStationExit, Worker, Appointment
+from .models import AssignedLocation, Customer, PostalCode, TrainStation, TrainStationExit, TrainStationPostalCodeDistance, Worker, Appointment
 
 class AppointmentInline(admin.TabularInline):
     model = Appointment
@@ -70,3 +70,17 @@ class TrainStationAdmin(admin.ModelAdmin):
     # Disable deletion
     def has_delete_permission(self, request, obj=None):
         return False
+
+@admin.register(TrainStationPostalCodeDistance)
+class TrainStationPostalCodeDistanceAdmin(admin.ModelAdmin):
+    # Disable editing of existing entries
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    # Disable deletion
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+@admin.register(AssignedLocation)
+class AssignedLocationAdmin(admin.ModelAdmin):
+    pass
