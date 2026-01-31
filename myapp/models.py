@@ -193,7 +193,8 @@ class TrainStationExit(models.Model):
     longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=False, null=False) # Longitude spans -180 to +180 degrees
 
     def __str__(self):
-        return f'{self.train_station.name}, ({self.latitude}, {self.longitude})'
+        return self.train_station.name
+        #return f'{self.train_station.name}, ({self.latitude}, {self.longitude})'
 
     class Meta:
         constraints = [
@@ -206,11 +207,12 @@ class TrainStationExit(models.Model):
 class AssignedLocation(models.Model):
     worker = models.ForeignKey(Worker, on_delete=models.PROTECT)
     train_station = models.ForeignKey(TrainStation, on_delete=models.PROTECT) 
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    start_time = models.DateTimeField(blank=False,null=False)
+    end_time = models.DateTimeField(blank=False,null=False)
+    distance_km = models.FloatField(blank=False,null=False,default=1)
 
     def __str__(self):
-        return f'{self.worker.name}-{self.train_station.name} {self.start_time.strftime("%Y-%m-%d")} ({self.start_time.strftime("%I:%M %p")}-{self.end_time.strftime("%I:%M %p")})'
+        return f'{self.worker.name}-{self.train_station.name}-{self.distance_km}km {self.start_time.strftime("%Y-%m-%d")} ({self.start_time.strftime("%I:%M %p")}-{self.end_time.strftime("%I:%M %p")})'
 
 class TrainStationPostalCodeDistance(models.Model):
     train_station = models.ForeignKey(TrainStation, on_delete=models.PROTECT)

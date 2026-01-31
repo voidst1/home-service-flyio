@@ -45,13 +45,12 @@ class AppointmentAdmin(admin.ModelAdmin):
 
 @admin.register(PostalCode)
 class PostalCodeAdmin(admin.ModelAdmin):
-    readonly_fields=('block_number','road_name','building','address','x','y','latitude','longitude')
-
+    read_only_fields = [field.name for field in PostalCode._meta.fields]
     inlines = [TrainStationPostalCodeDistanceInline]
 
     # Disable editing of existing entries
-    #def has_change_permission(self, request, obj=None):
-    #    return False
+    def has_change_permission(self, request, obj=None):
+        return False
 
     # Disable deletion
     def has_delete_permission(self, request, obj=None):
@@ -74,7 +73,8 @@ class TrainStationAdmin(admin.ModelAdmin):
         return False
 
 @admin.register(TrainStationExit)
-class TrainStationAdmin(admin.ModelAdmin):
+class TrainStationExitAdmin(admin.ModelAdmin):
+    list_display = ('train_station', 'latitude', 'longitude')
     readonly_fields = ['latitude', 'longitude']
 
     # Disable editing of existing entries
@@ -87,6 +87,8 @@ class TrainStationAdmin(admin.ModelAdmin):
 
 @admin.register(TrainStationPostalCodeDistance)
 class TrainStationPostalCodeDistanceAdmin(admin.ModelAdmin):
+    list_display = ('train_station', 'postal_code', 'distance')
+
     # Disable editing of existing entries
     def has_change_permission(self, request, obj=None):
         return False
