@@ -188,7 +188,7 @@ class TrainStation(models.Model):
         return self.name
 
 class TrainStationExit(models.Model):
-    train_station = models.ForeignKey(TrainStation, on_delete=models.PROTECT) 
+    train_station = models.ForeignKey(TrainStation, on_delete=models.PROTECT, related_name='train_station_exits')
     latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=False, null=False) # Latitude always falls between -90 and +90 degrees
     longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=False, null=False) # Longitude spans -180 to +180 degrees
 
