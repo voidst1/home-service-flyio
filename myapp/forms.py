@@ -48,6 +48,7 @@ class CustomerForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', 'Save Profile'))
         self.fields['frequency'].label = "How often do you need our service?"
 
+
 class BookSlotForm(forms.Form):
     def __init__(self, start_time, end_time, hours, price, *args, **kwargs):
 

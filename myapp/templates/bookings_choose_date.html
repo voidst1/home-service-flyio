@@ -1,0 +1,35 @@
+{% extends "customer.html" %}
+
+{% block customer %}
+
+<h3>Choose Date</h3>
+
+Hours:
+<form method="get">
+    <select name="hours" onchange="this.form.submit()">
+        {% for value, label in choices %}
+        <option value="{{ value }}" {% if request.GET.hours == label %}selected{% endif %}>
+            {{ label }}
+        </option>
+        {% endfor %}
+    </select>
+</form>
+
+<div class="row">
+    {% for d in dates %}
+
+    <a href="{% url 'bookings_choose_slot' %}?hours={{hours}}&date={{d|date:'Y-m-d'}}">
+        <div class="col-sm-3 mt-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ d|date:"j M Y (D)" }}</h5>
+                </div>
+            </div>
+        </div>
+    </a>
+
+    {% endfor %}
+</div>
+
+
+{% endblock %}

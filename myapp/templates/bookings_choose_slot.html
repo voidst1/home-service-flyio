@@ -2,21 +2,6 @@
 
 {% block customer %}
 
-Hours: 
-<form method="get">
-  <select name="hours" onchange="this.form.submit()">
-    {% for value, label in choices %}
-      <option value="{{ value }}" 
-              {% if request.GET.hours == label %}selected{% endif %}>
-        {{ label }}
-      </option>
-    {% endfor %}
-  </select>
-</form>
-
-
-
-
 
 <div class="row">
 {% load crispy_forms_tags %}

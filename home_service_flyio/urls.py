@@ -27,7 +27,7 @@ from myapp.views import (
     book_slot_view,
 
     bookings_view,
-    bookings_choose_hours_view,
+    bookings_choose_date_view,
     bookings_choose_slot_view,
 )
 
@@ -42,8 +42,12 @@ urlpatterns = [
 
     # bookings
     path('bookings/', bookings_view, name='bookings'),
-    path('bookings/choose-hours/', bookings_choose_hours_view,
-         name='bookings_choose_hours'),
+    #path('bookings/choose-hours/', bookings_choose_hours_view,
+    #     name='bookings_choose_hours'),
+
+    path('bookings/choose-date/', bookings_choose_date_view,
+         name='bookings_choose_date'),
+
     path('bookings/choose-slot/', bookings_choose_slot_view,
          name='bookings_choose_slot'),
 
