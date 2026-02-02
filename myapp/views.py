@@ -17,10 +17,12 @@ def default_bookings_choose_date_url():
     params = urlencode({'hours': Appointment.HOURS_CHOICES[0][1]})
     return f'{base_url}?{params}'
 
+
 def default_bookings_choose_slot_url():
     base_url = reverse('bookings_choose_slot')
     params = urlencode({'hours': Appointment.HOURS_CHOICES[0][1]})
     return f'{base_url}?{params}'
+
 
 def home_view(request):
     if request.user.is_authenticated:
@@ -45,6 +47,7 @@ def home_view(request):
 def onboarding_view(request):
     return redirect('onboarding_profile')
 
+
 def onboarding_profile_view(request):
     if request.method == 'POST':
         form = NewCustomerForm(request.POST)
@@ -57,14 +60,16 @@ def onboarding_profile_view(request):
 
     return render(request, 'onboarding_profile.html', {'form': form})
 
+
 @onboarding_required
 def profile_view(request):
-    context = { # see if this can be removed
+    context = {  # see if this can be removed
         'profile_exist': does_profile_exist(request.user)
     }
 
     if request.method == 'POST':
-        form = CustomerForm(request.POST, instance=request.user.customer_profile)
+        form = CustomerForm(
+            request.POST, instance=request.user.customer_profile)
         print(form.data)
         if form.is_valid():
             form.save()
@@ -100,6 +105,86 @@ def bookings_view(request):
     return render(request, 'bookings.html', context)
 
 
+@onboarding_required
+def bookings_new_view(request):
+    context = {
+        'profile_exist': does_profile_exist(request.user),
+        'choices_hours': Appointment.HOURS_CHOICES
+    }
+
+    if request.method == 'POST':
+        print('POST')
+
+
+        start_time = request.POST.get('start_time')
+        start_time = datetime.fromtimestamp(int(start_time))
+        hours = request.POST.get('hours')
+        hours = int(hours)
+        print(f'start_time: {start_time}')
+        print(f'hours: {hours}')
+
+
+
+        new_appointment = Appointment(
+            start_time=start_time, hours=hours, customer=request.user.customer_profile, worker=Worker.objects.first())
+        
+        new_appointment.save()
+
+        if True:
+            messages.success(request, 'Appointment booked.')
+            return redirect('bookings')
+        else:
+            messages.error(request, 'Invalid appointment. Try again.', 'danger')
+
+    if True:
+        now = timezone.now()
+        date_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_end = date_start + timedelta(days=14)  # default to 14 days first
+        #date_end = date_start + timedelta(days=1)  # for testing 1 day
+
+        available_slots = []
+
+        train_station_postal_code_distances = request.user.customer_profile.postal_code.train_station_postal_code_distance.all().order_by('distance_km')
+        for obj in train_station_postal_code_distances:
+            # print(obj.train_station)
+            # print(obj.distance_km)
+            assigned_locations = AssignedLocation.objects.filter(
+                train_station=obj.train_station,
+                distance_km__gte=obj.distance_km,
+                start_time__range=(date_start, date_end)
+            ).order_by('start_time')
+            print(assigned_locations)
+            for al in assigned_locations:
+                for hours, hours_str in Appointment.HOURS_CHOICES:
+                    available_slots.extend(al.get_available_slots(hours))
+                #available_slots.extend(al.get_available_slots(3)) # for testing
+
+        # context['slots'] = available_slots
+
+        slots = []
+        context['slots'] = slots
+
+        context['choices_dates'] = [('all', 'All')]
+
+        for slot in available_slots:
+            date_str = datetime.strftime(slot['start_time'], "%-d %b %Y (%a)")
+
+            exists = any(tup[0] == date_str for tup in context['choices_dates'])
+            if not exists:
+                context['choices_dates'].append((date_str, date_str))
+
+            slots.append({
+                'ts': int(slot['start_time'].timestamp()),
+                'date': datetime.strftime(slot['start_time'], "%d-%m-%Y"),
+                'date_str': date_str,
+                'start_time': datetime.strftime(slot['start_time'], "%-I:%M%P"),
+                'end_time': datetime.strftime(slot['end_time'], "%-I:%M%P"),
+                'hours': slot['hours'],
+                'price': slot['price']
+            })
+
+        return render(request, 'bookings_new.html', context)
+
 
 @onboarding_required
 def bookings_choose_date_view(request):
@@ -123,7 +208,7 @@ def bookings_choose_date_view(request):
 
     now = timezone.now()
     date_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    date_end = date_start + timedelta(days=14) # default to 14 days first
+    date_end = date_start + timedelta(days=14)  # default to 14 days first
 
     train_station_postal_code_distances = request.user.customer_profile.postal_code.train_station_postal_code_distance.all().order_by('distance_km')
     for obj in train_station_postal_code_distances:
@@ -132,17 +217,15 @@ def bookings_choose_date_view(request):
         assigned_locations = AssignedLocation.objects.filter(
             train_station=obj.train_station,
             distance_km__gte=obj.distance_km,
-            start_time__range=(date_start,date_end)
+            start_time__range=(date_start, date_end)
         ).order_by('start_time')
         print(assigned_locations)
         for al in assigned_locations:
-            #slots.extend(al.get_available_slots(hours))
+            # slots.extend(al.get_available_slots(hours))
             if al.has_available_slot(hours):
                 dates.append(al.start_time)
 
     return render(request, 'bookings_choose_date.html', context)
-
-
 
 
 @onboarding_required
@@ -184,33 +267,30 @@ def bookings_choose_slot_view(request):
         if not any(hours in tup for tup in Appointment.HOURS_CHOICES):
             return redirect(default_bookings_choose_slot_url())
 
-
         date_str = request.GET.get('date')
         if not date_str:
             return redirect(default_bookings_choose_date_url())
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         context['date'] = date_obj
 
-        date_start = date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_start = date_obj.replace(
+            hour=0, minute=0, second=0, microsecond=0)
         date_end = date_start + timedelta(days=1)
 
         available_slots = []
 
         train_station_postal_code_distances = request.user.customer_profile.postal_code.train_station_postal_code_distance.all().order_by('distance_km')
         for obj in train_station_postal_code_distances:
-            #print(obj.train_station)
-            #print(obj.distance_km)
+            # print(obj.train_station)
+            # print(obj.distance_km)
             assigned_locations = AssignedLocation.objects.filter(
                 train_station=obj.train_station,
                 distance_km__gte=obj.distance_km,
-                start_time__range=(date_start,date_end)
+                start_time__range=(date_start, date_end)
             ).order_by('start_time')
             print(assigned_locations)
             for al in assigned_locations:
                 available_slots.extend(al.get_available_slots(hours))
-
-
-
 
         '''
         # get slots
@@ -231,11 +311,10 @@ def bookings_choose_slot_view(request):
 
         # identify the worker(s) first
         '''
-        
-        # merge and dedup
-        #available_slots = worker.get_available_slots(date_start, hours)
-        #print(f'available slots: {available_slots}')
 
+        # merge and dedup
+        # available_slots = worker.get_available_slots(date_start, hours)
+        # print(f'available slots: {available_slots}')
 
         # dummy slots
         '''
@@ -272,5 +351,3 @@ def bookings_choose_slot_view(request):
                 start_time=slot['start_time'], end_time=slot['end_time'], hours=slot['hours'], price=slot['price']))
 
         return render(request, 'bookings_choose_slot.html', context)
-
-

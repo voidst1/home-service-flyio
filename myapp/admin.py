@@ -105,7 +105,9 @@ class TrainStationExitAdmin(admin.ModelAdmin):
 
 @admin.register(TrainStationPostalCodeDistance)
 class TrainStationPostalCodeDistanceAdmin(admin.ModelAdmin):
-    list_display = ('train_station', 'postal_code', 'distance_km')
+    def get_list_display(self, request):
+        return [f.name for f in self.model._meta.fields]
+    
 
     # Disable editing of existing entries
     def has_change_permission(self, request, obj=None):
@@ -115,7 +117,6 @@ class TrainStationPostalCodeDistanceAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-
 @admin.register(AssignedLocation)
 class AssignedLocationAdmin(admin.ModelAdmin):
-    pass
+    list_display = [field.name for field in AssignedLocation._meta.get_fields()]

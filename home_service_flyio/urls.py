@@ -27,6 +27,7 @@ from myapp.views import (
     book_slot_view,
 
     bookings_view,
+    bookings_new_view,
     bookings_choose_date_view,
     bookings_choose_slot_view,
 )
@@ -45,14 +46,16 @@ urlpatterns = [
     #path('bookings/choose-hours/', bookings_choose_hours_view,
     #     name='bookings_choose_hours'),
 
-    path('bookings/choose-date/', bookings_choose_date_view,
-         name='bookings_choose_date'),
+    path('bookings/new', bookings_new_view, name='bookings_new'),
 
-    path('bookings/choose-slot/', bookings_choose_slot_view,
-         name='bookings_choose_slot'),
+    #path('bookings/choose-date/', bookings_choose_date_view,
+    #     name='bookings_choose_date'),
+
+    #path('bookings/choose-slot/', bookings_choose_slot_view,
+    #     name='bookings_choose_slot'),
 
     # to remove
-    path('book-slot/', book_slot_view, name='book_slot'),
+    #path('book-slot/', book_slot_view, name='book_slot'),
 
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),

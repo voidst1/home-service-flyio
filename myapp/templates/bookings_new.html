@@ -1,0 +1,59 @@
+{% extends "customer.html" %}
+
+{% block customer %}
+
+New Booking
+
+<div x-data="listing">
+    <div>Hours:
+        <select name="hours" x-model="selectedHour">
+            {% for hour in choices_hours %}
+            <option value="{{ hour.0 }}">{{ hour.1 }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div>Date:
+        <select name="date" x-model="selectedDate">
+            {% for d in choices_dates %}
+            <option value="{{ d.0 }}">{{ d.1 }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="row">
+        <template x-for="item in items.filter(i => i.hours == selectedHour && (selectedDate == 'all' || selectedDate == i.date_str)).sort((a, b) => a.ts - b.ts)"
+            :key="item.ts + '-' + item.hours">
+            <div class="col-sm-3 mt-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title" x-text="item.date_str"></h5>
+                        <p class="card-text" x-text="item.start_time + ' - ' + item.end_time"></p>
+                        <p class="card-text" x-text="'$'+item.price"></p>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="start_time" x-model="item.ts">
+                            <input type="hidden" name="hours" x-model="item.hours">
+                            <input type="submit" name="submit" value="Book" class="btn btn-primary btn btn-primary" id="submit-id-submit">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('listing', () => ({
+            choicesHours: {{ choices_hours| safe }},
+            selectedHour: {{ choices_hours.0.0 }},
+            choicesDates: {{ choices_dates|safe}},
+            selectedDate: 'all',
+            items: {{ slots| safe }}, // if length is 0, show no available slots
+        }))
+    })
+</script>
+
+{% endblock %}

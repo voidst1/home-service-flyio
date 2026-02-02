@@ -2,11 +2,14 @@ import re
 from datetime import datetime, timedelta
 import sys
 import time
+import zoneinfo
 from django.db import models, transaction
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import Prefetch
 from django.utils import timezone
+from django.conf import settings
+
 
 from myapp.utils import get_distance_km, get_postal_code_info, validate_postal_code
 
@@ -276,6 +279,10 @@ class Appointment(models.Model):
         seconds = float(self.hours * 3600)
         self.end_time = self.start_time + timedelta(seconds=seconds)
         self.price = self.hours * 20
+
+        # TODO: check and confirm that the slot doesn't overlap other slots in the same day
+
+
         super().save(*args, **kwargs)
 
     
@@ -310,51 +317,19 @@ class AssignedLocation(models.Model):
     distance_km = models.FloatField(blank=False,null=False,default=1)
     hourly_rate = models.FloatField(blank=False,null=False,default=20)
 
+    @property
+    def start_time_local(self):
+        tz = zoneinfo.ZoneInfo(settings.TIME_ZONE) 
+        return self.start_time.astimezone(tz)
+
+    @property
+    def end_time_local(self):
+        tz = zoneinfo.ZoneInfo(settings.TIME_ZONE) 
+        return self.end_time.astimezone(tz)
+
     def __str__(self):
-        return f'{self.worker.name}-{self.train_station.name}-{self.distance_km}km {self.start_time.strftime("%Y-%m-%d")} ({self.start_time.strftime("%I:%M %p")}-{self.end_time.strftime("%I:%M %p")})'
-    
-    def has_available_slot(self, hours):
-        date_start = self.start_time.replace(hour=0, minute=0, second=0, microsecond=0)
-        date_end = date_start + timedelta(days=1)
-
-        appointments_taken = Appointment.objects.filter(worker=self.worker,
-                                                        start_time__range=(date_start,date_end)).order_by('start_time')
-        taken_slots_start_time = [obj.start_time for obj in appointments_taken]
-        taken_slots_end_time = [obj.end_time for obj in appointments_taken]
-
-        current_time = self.start_time
-        while(current_time < self.end_time):
-            potential_start_time = current_time
-            potential_end_time = potential_start_time + timedelta(minutes=hours*60)
-
-            # update current_time for next iteration, so continue can be used
-            # do not reuse this var anymore below
-            current_time = current_time + timedelta(minutes=60*hours)
-
-            # ensure it does not exceed end time of worker
-            if potential_end_time > self.end_time:
-                continue
-
-            invalid = False
-            for taken_slot_start_time in taken_slots_start_time:
-                # ensure the start time of taken slot is not in between potential slot
-                if taken_slot_start_time >= potential_start_time and taken_slot_start_time < potential_end_time:
-                    invalid = True
-                    break
-            if invalid:
-                continue
-            for taken_slot_end_time in taken_slots_end_time:
-                # ensure the end time of taken slot is not in between potential slot
-                taken_slot_end_time_adjusted = taken_slot_end_time + timedelta(minutes=60*1.5) # 1.5 hours break in-between
-                if taken_slot_end_time > potential_start_time and taken_slot_end_time <= potential_end_time:
-                    invalid = True
-                    break
-            if invalid:
-                continue
-
-            return True
-
-        return False
+        tz = zoneinfo.ZoneInfo(settings.TIME_ZONE) 
+        return f'{self.worker.name}-{self.train_station.name}-{self.distance_km}km {self.start_time_local.strftime("%Y-%m-%d")} ({self.start_time_local.strftime("%I:%M %p")}-{self.end_time_local.strftime("%I:%M %p")})'
 
     def get_available_slots(self, hours):
         date_start = self.start_time.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -364,6 +339,8 @@ class AssignedLocation(models.Model):
                                                         start_time__range=(date_start,date_end)).order_by('start_time')
         taken_slots_start_time = [obj.start_time for obj in appointments_taken]
         taken_slots_end_time = [obj.end_time for obj in appointments_taken]
+        taken_slots_time = [(obj.start_time, obj.end_time) for obj in appointments_taken]
+        print(appointments_taken)
 
         available_slots = []
 
@@ -382,28 +359,25 @@ class AssignedLocation(models.Model):
                 continue
 
             invalid = False
-            for taken_slot_start_time in taken_slots_start_time:
-                # ensure the start time of taken slot is not in between potential slot
-                if taken_slot_start_time >= potential_start_time and taken_slot_start_time < potential_end_time:
+
+            for taken_slot_start_time, taken_slot_end_time in taken_slots_time:
+                taken_slot_end_time_adjusted = taken_slot_end_time + timedelta(minutes=60*1.5) # 1.5 hours break in-between
+
+                if potential_start_time >= taken_slot_start_time and potential_start_time < taken_slot_end_time_adjusted:
                     invalid = True
                     break
-            if invalid:
-                current_time = current_time + timedelta(minutes=60*0.5)
-                continue
-            for taken_slot_end_time in taken_slots_end_time:
-                # ensure the end time of taken slot is not in between potential slot
-                taken_slot_end_time_adjusted = taken_slot_end_time + timedelta(minutes=60*1.5) # 1.5 hours break in-between
-                if taken_slot_end_time_adjusted > potential_start_time and taken_slot_end_time_adjusted <= potential_end_time:
+                if potential_end_time > taken_slot_start_time and potential_end_time <= taken_slot_end_time_adjusted:
                     invalid = True
                     break
             if invalid:
                 current_time = current_time + timedelta(minutes=60*0.5)
                 continue
 
-            #print(potential_start_time, potential_end_time)
+            tz = zoneinfo.ZoneInfo(settings.TIME_ZONE) 
+            print(potential_start_time, potential_end_time)
             available_slots.append({
-                'start_time': potential_start_time,
-                'end_time': potential_end_time,
+                'start_time': potential_start_time.astimezone(tz),
+                'end_time': potential_end_time.astimezone(tz),
                 'hours': hours,
                 'price': hours * self.hourly_rate,
             })
