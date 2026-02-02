@@ -115,26 +115,30 @@ def bookings_new_view(request):
     if request.method == 'POST':
         print('POST')
 
-
         start_time = request.POST.get('start_time')
         start_time = datetime.fromtimestamp(int(start_time))
         hours = request.POST.get('hours')
         hours = int(hours)
+        a_id = request.POST.get('aid')
+        a_id = int(a_id)
         print(f'start_time: {start_time}')
         print(f'hours: {hours}')
+        print(f'a_id: {a_id}')
 
-
+        al = AssignedLocation.objects.get(id=a_id)
+        #worker=Worker.objects.first()
+        worker = al.worker
 
         new_appointment = Appointment(
-            start_time=start_time, hours=hours, customer=request.user.customer_profile, worker=Worker.objects.first())
-        
-        new_appointment.save()
+            start_time=start_time, hours=hours, customer=request.user.customer_profile, worker=worker)
 
-        if True:
+        try:
+            new_appointment.save(hourly_rate=al.hourly_rate)
             messages.success(request, 'Appointment booked.')
             return redirect('bookings')
-        else:
-            messages.error(request, 'Invalid appointment. Try again.', 'danger')
+
+        except Exception as e:
+            messages.error(request, str(e), 'danger')
 
     if True:
         now = timezone.now()
@@ -174,6 +178,7 @@ def bookings_new_view(request):
                 context['choices_dates'].append((date_str, date_str))
 
             slots.append({
+                'aid': slot['assigned_location_id'],
                 'ts': int(slot['start_time'].timestamp()),
                 'date': datetime.strftime(slot['start_time'], "%d-%m-%Y"),
                 'date_str': date_str,

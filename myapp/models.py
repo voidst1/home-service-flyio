@@ -275,16 +275,28 @@ class Appointment(models.Model):
     def __str__(self):
         return f"{self.customer.coordinator}: {self.worker.name} - {self.customer.name} ({self.start_time})"  
 
-    def save(self, *args, **kwargs):
+    def save(self, hourly_rate=20, *args, **kwargs):
         seconds = float(self.hours * 3600)
         self.end_time = self.start_time + timedelta(seconds=seconds)
-        self.price = self.hours * 20
+        self.price = self.hours * hourly_rate
 
-        # TODO: check and confirm that the slot doesn't overlap other slots in the same day
-
-
-        super().save(*args, **kwargs)
-
+        with transaction.atomic():
+            # Lock appointments for this resource in the time window
+            Appointment.objects.select_for_update().filter(
+                worker_id=self.worker_id,
+                start_time__lt=self.end_time,
+                end_time__gt=self.start_time
+            ).exists()  # Triggers lock
+            
+            # Re-check after lock
+            if Appointment.objects.filter(
+                worker_id=self.worker_id,
+                start_time__lt=self.end_time,
+                end_time__gt=self.start_time
+            ).exclude(id=self.pk).exists():
+                raise ValidationError("Time slot taken.")
+            
+            super().save(*args, **kwargs)
     
 class TrainStation(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -336,11 +348,14 @@ class AssignedLocation(models.Model):
         date_end = date_start + timedelta(days=1)
 
         appointments_taken = Appointment.objects.filter(worker=self.worker,
-                                                        start_time__range=(date_start,date_end)).order_by('start_time')
+                                                        start_time__range=(self.start_time,self.end_time)).order_by('start_time')
+        print(date_start)
+        print(date_end)
+        print(appointments_taken)
         taken_slots_start_time = [obj.start_time for obj in appointments_taken]
         taken_slots_end_time = [obj.end_time for obj in appointments_taken]
         taken_slots_time = [(obj.start_time, obj.end_time) for obj in appointments_taken]
-        print(appointments_taken)
+
 
         available_slots = []
 
@@ -374,8 +389,9 @@ class AssignedLocation(models.Model):
                 continue
 
             tz = zoneinfo.ZoneInfo(settings.TIME_ZONE) 
-            print(potential_start_time, potential_end_time)
+            #print(potential_start_time, potential_end_time)
             available_slots.append({
+                'assigned_location_id': self.id,
                 'start_time': potential_start_time.astimezone(tz),
                 'end_time': potential_end_time.astimezone(tz),
                 'hours': hours,

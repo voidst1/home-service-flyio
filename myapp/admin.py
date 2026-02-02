@@ -5,6 +5,7 @@ from .models import AssignedLocation, Customer, PostalCode, TrainStation, TrainS
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in Appointment._meta.get_fields()]
     fields = ['customer', 'worker', 'status', 'hours',
               'price', 'commission', 'start_time', 'end_time']
     readonly_fields = ['end_time', 'price', 'commission']
