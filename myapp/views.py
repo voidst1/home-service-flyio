@@ -118,7 +118,7 @@ def bookings_new_view(request):
         start_time = request.POST.get('start_time')
         start_time = datetime.fromtimestamp(int(start_time))
         hours = request.POST.get('hours')
-        hours = int(hours)
+        hours = float(hours)
         a_id = request.POST.get('aid')
         a_id = int(a_id)
         print(f'start_time: {start_time}')
