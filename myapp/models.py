@@ -112,6 +112,18 @@ class Appointment(models.Model):
     def __str__(self):
         return f"{self.customer.coordinator}: {self.worker.name} - {self.customer.name} ({self.start_time})"
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if Appointment.objects.filter(
+            worker_id=self.worker_id,
+            start_time__lt=self.end_time,
+            end_time__gt=self.start_time
+        ).exclude(id=self.pk).exists():
+            raise ValidationError("Time slot taken.")
+
+        return cleaned_data
+
     def save(self, hourly_rate=20, *args, **kwargs):
         seconds = float(self.hours * 3600)
         self.end_time = self.start_time + timedelta(seconds=seconds)
@@ -160,6 +172,37 @@ class AssignedLocation(models.Model):
     def __str__(self):
         tz = zoneinfo.ZoneInfo(settings.TIME_ZONE)
         return f'{self.worker.name}-{self.train_station.name}-{self.distance_km}km {self.start_time_local.strftime("%Y-%m-%d")} ({self.start_time_local.strftime("%I:%M %p")}-{self.end_time_local.strftime("%I:%M %p")})'
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if AssignedLocation.objects.filter(
+            worker_id=self.worker_id,
+            start_time__lt=self.end_time,
+            end_time__gt=self.start_time
+        ).exclude(id=self.pk).exists():
+            raise ValidationError("Date/time taken.")
+
+        return cleaned_data
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            # Lock appointments for this resource in the time window
+            AssignedLocation.objects.select_for_update().filter(
+                worker_id=self.worker_id,
+                start_time__lt=self.end_time,
+                end_time__gt=self.start_time
+            ).exists()  # Triggers lock
+
+            # Re-check after lock
+            if AssignedLocation.objects.filter(
+                worker_id=self.worker_id,
+                start_time__lt=self.end_time,
+                end_time__gt=self.start_time
+            ).exclude(id=self.pk).exists():
+                raise ValidationError("Date/time taken.")
+
+            super().save(*args, **kwargs)
 
     def get_available_slots(self, hours):
         date_start = self.start_time.replace(
