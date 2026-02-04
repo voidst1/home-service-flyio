@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django_bootstrap5",
     "crispy_forms",
     "crispy_bootstrap5",
+    "auditlog",
     "postal_codes",
     "myapp",
 ]

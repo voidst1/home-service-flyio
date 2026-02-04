@@ -10,6 +10,7 @@ from django.db.models import Prefetch
 from django.utils import timezone
 from django.conf import settings
 
+from auditlog.registry import auditlog
 
 from postal_codes.models import PostalCode, TrainStation
 
@@ -61,6 +62,7 @@ class Customer(models.Model):
         # https://www.onemap.gov.sg/apidocs/search
         super().save(*args, **kwargs)
 
+auditlog.register(Customer)
 
 class Appointment(models.Model):
     STATUS_CHOICES = [
@@ -133,6 +135,7 @@ class Appointment(models.Model):
 
             super().save(*args, **kwargs)
 
+auditlog.register(Appointment)
 
 class AssignedLocation(models.Model):
     worker = models.ForeignKey(
@@ -217,3 +220,5 @@ class AssignedLocation(models.Model):
             })
 
         return available_slots
+
+auditlog.register(AssignedLocation)
