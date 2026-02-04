@@ -126,7 +126,6 @@ def bookings_new_view(request):
         print(f'a_id: {a_id}')
 
         al = AssignedLocation.objects.get(id=a_id)
-        #worker=Worker.objects.first()
         worker = al.worker
 
         new_appointment = Appointment(

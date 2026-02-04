@@ -5,6 +5,8 @@ import myapp.models
 from django.conf import settings
 from django.db import migrations, models
 
+import postal_codes
+
 
 class Migration(migrations.Migration):
 
@@ -49,7 +51,7 @@ class Migration(migrations.Migration):
                 (
                     "postal_code",
                     models.CharField(
-                        max_length=6, validators=[myapp.models.validate_postal_code]
+                        max_length=6, validators=[postal_codes.models.validate_postal_code]
                     ),
                 ),
                 ("street_name", models.CharField(max_length=200)),

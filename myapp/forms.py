@@ -5,7 +5,6 @@ from crispy_forms.layout import Submit, Layout, Hidden
 from crispy_forms.helper import FormHelper
 from django.core import serializers
 from django.core.exceptions import ValidationError
-from .utils import get_postal_code_info
 
 class BookingHoursForm(forms.Form):
     hours = forms.ChoiceField(
