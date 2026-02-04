@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AssignedLocation, Customer, Worker, Appointment
+from .models import AssignedLocation, Customer, Referrer, Worker, Appointment
 
 
 @admin.register(Appointment)
@@ -22,10 +22,10 @@ class AppointmentInline(admin.TabularInline):
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['id', 'coordinator', 'name',
+    list_display = ['id', 'referrer', 'name',
                     'phone_number', 'address', 'unit_number']
     fields = [
-        'coordinator',
+        'referrer',
         'user',
         'name',
         'phone_number',
@@ -43,6 +43,12 @@ class CustomerAdmin(admin.ModelAdmin):
 class WorkerAdmin(admin.ModelAdmin):
     inlines = [AppointmentInline]
 
+class CustomerInline(admin.TabularInline):
+    model = Customer
+
+@admin.register(Referrer)
+class ReferrerAdmin(admin.ModelAdmin):
+    inlines = [CustomerInline]
 
 @admin.register(AssignedLocation)
 class AssignedLocationAdmin(admin.ModelAdmin):

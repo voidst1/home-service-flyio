@@ -1,5 +1,6 @@
+import sys
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 
 from postal_codes.utils import get_distance_km, get_postal_code_info, validate_postal_code
 
@@ -17,19 +18,15 @@ class PostalCode(models.Model):
     y = models.DecimalField(
         max_digits=15, decimal_places=10, blank=False, null=False)  # Y
     latitude = models.DecimalField(
-        max_digits=10, decimal_places=6, blank=False, null=False)  # LATITUDE
+        max_digits=16, decimal_places=14, blank=False, null=False)  # LATITUDE
     longitude = models.DecimalField(
-        max_digits=10, decimal_places=6, blank=False, null=False)  # LONGITUDE
+        max_digits=16, decimal_places=12, blank=False, null=False)  # LONGITUDE
 
     def __str__(self):
         return self.name
 
-    def clean(self):
-        all_fields = [f.name for f in self._meta.fields]
-        self.clean_fields(exclude=[f for f in all_fields if f not in ['name']])
-
+    def load_fields_from_api(self):
         postal_code_result = get_postal_code_info(self.name)
-        # print(postal_code_result)
 
         if isinstance(postal_code_result, str):  # if error message string returned
             raise ValidationError({
@@ -49,16 +46,21 @@ class PostalCode(models.Model):
             self.y = result['Y']
             self.latitude = result['LATITUDE']
             self.longitude = result['LONGITUDE']
+            print(self.latitude)
+            print(self.longitude)
 
     def save(self, *args, **kwargs):
         is_new_state = self._state.adding
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            if is_new_state:
+                self.load_fields_from_api()
+                self.full_clean()
+            super().save(*args, **kwargs)
 
-        if is_new_state:
-            # if True:
-            new_records = self.get_train_stations_within_distance_km(
-                float(self.latitude), float(self.longitude))
-            TrainStationPostalCodeDistance.objects.bulk_create(new_records)
+            if is_new_state:
+                new_records = self.get_train_stations_within_distance_km(
+                    float(self.latitude), float(self.longitude))
+                TrainStationPostalCodeDistance.objects.bulk_create(new_records)
 
     # possibly 1 to 3km
     def get_train_stations_within_distance_km(self, lat, long, max_distance=3):

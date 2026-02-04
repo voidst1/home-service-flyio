@@ -28,5 +28,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-         migrations.RunPython(seed_from_csv, reverse_seed),
+         #migrations.RunPython(seed_from_csv, reverse_seed),
     ]

@@ -1,13 +1,8 @@
-import re
-from datetime import datetime, timedelta
-import sys
-import time
+from datetime import timedelta
 import zoneinfo
 from django.db import models, transaction
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models import Prefetch
-from django.utils import timezone
 from django.conf import settings
 
 from auditlog.registry import auditlog
@@ -16,19 +11,27 @@ from postal_codes.models import PostalCode, TrainStation
 
 
 class Worker(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
+class Referrer(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
 class Customer(models.Model):
     name = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=100)  # TODO: validate better
+    email_address = models.CharField(max_length=200, unique=True, blank=True, null=True)
+    phone_number = models.CharField(max_length=100, unique=True)  # TODO: validate better
     postal_code = models.ForeignKey(PostalCode, on_delete=models.PROTECT)
-    unit_number = models.CharField(max_length=10, blank=True)
+    unit_number = models.CharField(max_length=10, blank=True, null=True)
     frequency = models.CharField(max_length=100)
 
     @property
@@ -40,16 +43,22 @@ class Customer(models.Model):
         return self.postal_code.address
 
     # rename to account_manager
-    coordinator = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # Best practice
+    referrer = models.ForeignKey(
+        #settings.AUTH_USER_MODEL,  # Best practice
+        Referrer,
         on_delete=models.PROTECT,
         related_name='customers',
+        blank=True,
+        null=True,
     )
 
+    # allow user to be blank for initial version
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='customer_profile',
+        blank=True,
+        null=True,
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -110,7 +119,7 @@ class Appointment(models.Model):
         ordering = ['-start_time']
 
     def __str__(self):
-        return f"{self.customer.coordinator}: {self.worker.name} - {self.customer.name} ({self.start_time})"
+        return f"{self.customer.referrer}: {self.worker.name} - {self.customer.name} ({self.start_time})"
 
     def clean(self):
         cleaned_data = super().clean()
