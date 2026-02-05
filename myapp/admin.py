@@ -23,7 +23,7 @@ class AppointmentInline(admin.TabularInline):
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ['id', 'referrer', 'name',
-                    'phone_number', 'address', 'unit_number']
+                    'phone_number', 'road_name', 'unit_number', 'postal_code']
     fields = [
         'referrer',
         'user',
