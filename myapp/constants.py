@@ -1,0 +1,3 @@
+AUTH_GROUP_AFFILIATE = 'Affiliate'
+
+

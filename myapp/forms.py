@@ -28,7 +28,8 @@ class NewCustomerForm(forms.ModelForm):
 
         if user:
             instance.user = user
-            instance.referrer = user # TODO: add referral code
+            #instance.referrer = user # TODO: add referral code
+            
         if commit:
             instance.save()
         return instance

@@ -18,6 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from myapp.views import (
+    customers_view,
     home_view,
 
     onboarding_view,
@@ -56,6 +57,9 @@ urlpatterns = [
 
     # to remove
     #path('book-slot/', book_slot_view, name='book_slot'),
+
+    # customers
+    path('customers/', customers_view, name='customers'),
 
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),

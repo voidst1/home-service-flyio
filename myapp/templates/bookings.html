@@ -1,10 +1,14 @@
-{% extends "customer.html" %}
+{% extends "base.html" %}
 
-{% block customer %}
+{% block content %}
 
 
 
-<a type="button" class="btn btn-primary" href="{% url 'bookings_new' %}">+ Book Slot</a>
+<a type="button" class="btn btn-primary" href="{% url 'bookings_new' %}">+ New Booking</a>
+
+<br/>
+<br/>
+<br/>
 
 <h3>Upcoming</h3>
 

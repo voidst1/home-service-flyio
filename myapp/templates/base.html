@@ -13,8 +13,24 @@
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
             <a href="/"
                 class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
-                <span class="fs-4">Home Master</span>
+                <span class="fs-4">
+                    {% load static %}
+                    <img src="{% static 'logo.svg' %}" alt="HomeMaster Logo">
+                </span>
             </a>
+            {% if profile_exists %}
+                <ul class="nav nav-underline mx-4">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'customers' %}">Customers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'bookings' %}">Bookings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+                    </li>
+                </ul>
+            {% endif %}
             <ul class="nav nav-pills">
                 {% if user.is_authenticated %}
                 <form method="post" action="{% url 'account_logout' %}" class="d-inline">
@@ -28,12 +44,21 @@
             </ul>
         </header>
     </div>
-
-
     {% endblock %}
-    {% block content %}
-    <!-- default content text (typically empty) -->
-    {% endblock %}
+
+    <main class="container-sm">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        <!-- default content text (typically empty) -->
+        {% endblock %}
+    </main>
 </body>
 
 {# Load the tag library #}

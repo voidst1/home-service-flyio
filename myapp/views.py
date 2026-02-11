@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
-import time
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.utils import timezone
 from .forms import CustomerForm, BookSlotForm, NewCustomerForm
 from .models import Appointment, AssignedLocation, Worker
 from .decorators import onboarding_required
-from .utils import does_profile_exist
+from .utils import get_user_context
 from django.urls import reverse
 from urllib.parse import urlencode
 from django.contrib import messages
@@ -63,9 +62,7 @@ def onboarding_profile_view(request):
 
 @onboarding_required
 def profile_view(request):
-    context = {  # see if this can be removed
-        'profile_exist': does_profile_exist(request.user)
-    }
+    context = get_user_context(request.user)
 
     if request.method == 'POST':
         form = CustomerForm(
@@ -87,17 +84,13 @@ def profile_view(request):
 
 @onboarding_required
 def book_slot_view(request):
-    context = {
-        'profile_exist': does_profile_exist(request.user)
-    }
+    context = get_user_context(request.user)
     return render(request, 'book_slot.html', context)
 
 
 @onboarding_required
 def bookings_view(request):
-    context = {
-        'profile_exist': does_profile_exist(request.user)
-    }
+    context = get_user_context(request.user)
 
     appointments = request.user.customer_profile.appointments.all()
     context['appointments'] = appointments
@@ -107,10 +100,8 @@ def bookings_view(request):
 
 @onboarding_required
 def bookings_new_view(request):
-    context = {
-        'profile_exist': does_profile_exist(request.user),
-        'choices_hours': Appointment.HOURS_CHOICES
-    }
+    context = get_user_context(request.user)
+    context['choices_hours'] = Appointment.HOURS_CHOICES
 
     if request.method == 'POST':
         print('POST')
@@ -159,8 +150,8 @@ def bookings_new_view(request):
             print(assigned_locations)
             for al in assigned_locations:
                 for hours, hours_str in Appointment.HOURS_CHOICES:
-                    available_slots.extend(al.get_available_slots(hours))
-                #available_slots.extend(al.get_available_slots(3)) # for testing
+                    available_slots.extend(al.get_available_slots_v2(hours))
+                #available_slots.extend(al.get_available_slots_v2(3)) # for testing
 
         # context['slots'] = available_slots
 
@@ -192,10 +183,8 @@ def bookings_new_view(request):
 
 @onboarding_required
 def bookings_choose_date_view(request):
-    context = {
-        'profile_exist': does_profile_exist(request.user),
-        'choices': Appointment.HOURS_CHOICES
-    }
+    context = get_user_context(request.user)
+    context['choices'] = Appointment.HOURS_CHOICES
 
     hours = request.GET.get('hours')  # validate user input
     if not hours:
@@ -225,7 +214,7 @@ def bookings_choose_date_view(request):
         ).order_by('start_time')
         print(assigned_locations)
         for al in assigned_locations:
-            # slots.extend(al.get_available_slots(hours))
+            # slots.extend(al.get_available_slots_v2(hours))
             if al.has_available_slot(hours):
                 dates.append(al.start_time)
 
@@ -234,10 +223,9 @@ def bookings_choose_date_view(request):
 
 @onboarding_required
 def bookings_choose_slot_view(request):
-    context = {
-        'profile_exist': does_profile_exist(request.user),
-        'choices': Appointment.HOURS_CHOICES
-    }
+    context = get_user_context(request.user)
+    context['choices'] = Appointment.HOURS_CHOICES
+    
     if request.method == 'POST':
         customer = request.user.customer_profile
         worker = Worker.objects.all().first()  # temp
@@ -294,7 +282,7 @@ def bookings_choose_slot_view(request):
             ).order_by('start_time')
             print(assigned_locations)
             for al in assigned_locations:
-                available_slots.extend(al.get_available_slots(hours))
+                available_slots.extend(al.get_available_slots_v2(hours))
 
         '''
         # get slots
@@ -317,7 +305,7 @@ def bookings_choose_slot_view(request):
         '''
 
         # merge and dedup
-        # available_slots = worker.get_available_slots(date_start, hours)
+        # available_slots = worker.get_available_slots_v2(date_start, hours)
         # print(f'available slots: {available_slots}')
 
         # dummy slots
@@ -355,3 +343,8 @@ def bookings_choose_slot_view(request):
                 start_time=slot['start_time'], end_time=slot['end_time'], hours=slot['hours'], price=slot['price']))
 
         return render(request, 'bookings_choose_slot.html', context)
+
+@onboarding_required
+def customers_view(request):
+    context = get_user_context(request.user)
+    return render(request, 'customers.html', context)

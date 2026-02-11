@@ -1,9 +1,11 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
+import uuid
 import zoneinfo
 from django.db import models, transaction
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.utils import timezone
 
 from auditlog.registry import auditlog
 
@@ -18,8 +20,54 @@ class Worker(models.Model):
     def __str__(self):
         return self.name
 
-class Referrer(models.Model):
+class WorkerWeeklySchedule(models.Model):
+    worker = models.OneToOneField(
+        Worker,
+        on_delete=models.CASCADE,
+        related_name='weekly_schedule',
+    )
+    monday_location = models.ForeignKey(
+        TrainStation, on_delete=models.SET_NULL,
+        related_name='weekly_schedules_monday',
+        blank=True, null=True,
+        verbose_name='Monday')
+    tuesday_location = models.ForeignKey(
+        TrainStation, on_delete=models.SET_NULL,
+        related_name='weekly_schedules_tuesday',
+        blank=True, null=True,
+        verbose_name='Tuesday')
+    wednesday_location = models.ForeignKey(
+        TrainStation, on_delete=models.SET_NULL,
+        related_name='weekly_schedules_wednesday',
+        blank=True, null=True,
+        verbose_name='Wednesday')
+    thursday_location = models.ForeignKey(
+        TrainStation, on_delete=models.SET_NULL,
+        related_name='weekly_schedules_thursday',
+        blank=True, null=True,
+        verbose_name='Thursday')
+    friday_location = models.ForeignKey(
+        TrainStation, on_delete=models.SET_NULL,
+        related_name='weekly_schedules_friday',
+        blank=True, null=True,
+        verbose_name='Friday')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.worker.name
+
+
+class Affiliate(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='affiliate',
+        blank=True,
+        null=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -33,25 +81,13 @@ class Customer(models.Model):
     postal_code = models.ForeignKey(PostalCode, on_delete=models.PROTECT)
     unit_number = models.CharField(max_length=10, blank=True, null=True)
     frequency = models.CharField(max_length=100)
-
-    @property
-    def road_name(self):
-        return " ".join([self.postal_code.block_number, self.postal_code.road_name])
-
-    @property
-    def address(self):
-        return self.postal_code.address
-
-    # rename to account_manager
-    referrer = models.ForeignKey(
-        #settings.AUTH_USER_MODEL,  # Best practice
-        Referrer,
+    affiliate = models.ForeignKey(
+        Affiliate,
         on_delete=models.PROTECT,
         related_name='customers',
         blank=True,
         null=True,
     )
-
     # allow user to be blank for initial version
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -60,9 +96,23 @@ class Customer(models.Model):
         blank=True,
         null=True,
     )
-
+    preferred_worker = models.ForeignKey(
+        Worker,
+        on_delete=models.PROTECT,
+        related_name='customers',
+        blank=True,
+        null=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def road_name(self):
+        return " ".join([self.postal_code.block_number, self.postal_code.road_name])
+
+    @property
+    def address(self):
+        return self.postal_code.address
 
     def __str__(self):
         return self.name
@@ -80,13 +130,27 @@ class Appointment(models.Model):
         ('done', 'Done'),
     ]
 
+    INTERVAL_BREAK_HOUR = 1
+
     HOURS_CHOICES = [
         (3, str(3)),
         (3.5, str(3.5)),
         (4, str(4)),
-        (4.5, str(4.5)),
-        (5, str(5)),
     ]
+
+    # include 0830?
+    def get_start_time_choices(date:datetime):
+        date_obj = date.replace(hour=0, minute=0,second=0,microsecond=0)
+        date_obj = timezone.localtime(date_obj)
+        print(date_obj)
+        return [
+            date_obj.replace(hour=8), # morning
+            date_obj.replace(hour=9), # morning
+            date_obj.replace(hour=13), # afternoon
+            date_obj.replace(hour=14), # afternoon
+            date_obj.replace(hour=18), # night
+            date_obj.replace(hour=19), # night
+        ]
 
     customer = models.ForeignKey(
         Customer,
@@ -168,6 +232,9 @@ class AssignedLocation(models.Model):
     distance_km = models.FloatField(blank=False, null=False, default=1)
     hourly_rate = models.FloatField(blank=False, null=False, default=20)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     @property
     def start_time_local(self):
         tz = zoneinfo.ZoneInfo(settings.TIME_ZONE)
@@ -212,7 +279,7 @@ class AssignedLocation(models.Model):
                 raise ValidationError("Date/time taken.")
 
             super().save(*args, **kwargs)
-
+    '''
     def get_available_slots(self, hours):
         date_start = self.start_time.replace(
             hour=0, minute=0, second=0, microsecond=0)
@@ -223,8 +290,8 @@ class AssignedLocation(models.Model):
         print(date_start)
         print(date_end)
         print(appointments_taken)
-        taken_slots_start_time = [obj.start_time for obj in appointments_taken]
-        taken_slots_end_time = [obj.end_time for obj in appointments_taken]
+        #taken_slots_start_time = [obj.start_time for obj in appointments_taken]
+        #taken_slots_end_time = [obj.end_time for obj in appointments_taken]
         taken_slots_time = [(obj.start_time, obj.end_time)
                             for obj in appointments_taken]
 
@@ -249,7 +316,7 @@ class AssignedLocation(models.Model):
 
             for taken_slot_start_time, taken_slot_end_time in taken_slots_time:
                 taken_slot_end_time_adjusted = taken_slot_end_time + \
-                    timedelta(minutes=60*1.5)  # 1.5 hours break in-between
+                    timedelta(minutes=60*Appointment.INTERVAL_BREAK_HOUR)  # break in-between appointments
 
                 if potential_start_time >= taken_slot_start_time and potential_start_time < taken_slot_end_time_adjusted:
                     invalid = True
@@ -263,6 +330,62 @@ class AssignedLocation(models.Model):
 
             tz = zoneinfo.ZoneInfo(settings.TIME_ZONE)
             # print(potential_start_time, potential_end_time)
+            available_slots.append({
+                'assigned_location_id': self.id,
+                'start_time': potential_start_time.astimezone(tz),
+                'end_time': potential_end_time.astimezone(tz),
+                'hours': hours,
+                'price': hours * self.hourly_rate,
+            })
+
+        return available_slots
+    '''
+
+    '''
+    Version 2
+
+    Start Time
+    Morning - 0800, 0900 
+    Afternoon - 1300, 1400
+    Evening - 1800, 1900
+
+
+    '''
+    def get_available_slots_v2(self, hours):
+        appointments_taken = Appointment.objects.filter(worker=self.worker,
+                                                        start_time__range=(self.start_time, self.end_time)).order_by('start_time')
+        print(f'appointments_taken: {appointments_taken}')
+
+        taken_slots_time = [(obj.start_time, obj.end_time)
+                            for obj in appointments_taken]
+        available_slots = []
+
+        start_time_choices = Appointment.get_start_time_choices(self.start_time)
+        for start_time_choice in start_time_choices:
+            potential_start_time = start_time_choice
+            potential_end_time = potential_start_time + \
+                timedelta(minutes=hours*60)
+
+            # ensure it does not exceed end time of worker
+            if potential_end_time > self.end_time:
+                continue
+
+            invalid = False
+
+            for taken_slot_start_time, taken_slot_end_time in taken_slots_time:
+                taken_slot_end_time_adjusted = taken_slot_end_time + \
+                    timedelta(minutes=60*Appointment.INTERVAL_BREAK_HOUR)  # break in-between appointments
+
+                if potential_start_time >= taken_slot_start_time and potential_start_time < taken_slot_end_time_adjusted:
+                    invalid = True
+                    break
+                if potential_end_time > taken_slot_start_time and potential_end_time <= taken_slot_end_time_adjusted:
+                    invalid = True
+                    break
+            if invalid:
+                continue
+
+            tz = zoneinfo.ZoneInfo(settings.TIME_ZONE)
             available_slots.append({
                 'assigned_location_id': self.id,
                 'start_time': potential_start_time.astimezone(tz),
