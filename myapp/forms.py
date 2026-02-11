@@ -14,7 +14,7 @@ class BookingHoursForm(forms.Form):
 class NewCustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
-        exclude = ['referrer', 'user']
+        exclude = ['affiliate', 'user']
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,7 +28,7 @@ class NewCustomerForm(forms.ModelForm):
 
         if user:
             instance.user = user
-            #instance.referrer = user # TODO: add referral code
+            #instance.affiliate = user # TODO: add referral code
             
         if commit:
             instance.save()
@@ -38,7 +38,7 @@ class NewCustomerForm(forms.ModelForm):
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
-        exclude = ['referrer', 'user'] # check if user can add additional params on their own
+        exclude = ['affiliate', 'user'] # check if user can add additional params on their own
         #fields = '__all__' # or ['name', 'email', 'message']
     
     def __init__(self, *args, **kwargs):

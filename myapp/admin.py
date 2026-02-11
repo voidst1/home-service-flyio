@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 
 from .models import AssignedLocation, Customer, Affiliate, Worker, Appointment, WorkerWeeklySchedule
 
@@ -8,17 +9,23 @@ class AppointmentAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Appointment._meta.get_fields()]
     list_filter = ['start_time', 'worker']
 
-    fields = ['customer', 'worker', 'status', 'hours',
-              'price', 'commission', 'start_time', 'end_time']
+    fields = ['customer', 'worker',
+              'start_time', 'end_time',
+              'hours',
+              'price', 'commission',
+              'status', 'paid']
+
     readonly_fields = ['end_time', 'price', 'commission']
-
-
+    
 class AppointmentInline(admin.TabularInline):
     model = Appointment
-    fields = ['customer', 'worker', 'status', 'hours',
-              'price', 'commission', 'start_time', 'end_time']
+    fields = ['customer', 'worker',
+              'start_time', 'end_time',
+              'hours',
+              'price', 'commission',
+              'status']
     readonly_fields = ['end_time', 'price', 'commission']
-
+    extra = 1
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):

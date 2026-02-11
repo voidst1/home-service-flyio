@@ -183,19 +183,7 @@ class Appointment(models.Model):
         ordering = ['-start_time']
 
     def __str__(self):
-        return f"{self.customer.referrer}: {self.worker.name} - {self.customer.name} ({self.start_time})"
-
-    def clean(self):
-        cleaned_data = super().clean()
-
-        if Appointment.objects.filter(
-            worker_id=self.worker_id,
-            start_time__lt=self.end_time,
-            end_time__gt=self.start_time
-        ).exclude(id=self.pk).exists():
-            raise ValidationError("Time slot taken.")
-
-        return cleaned_data
+        return f"{self.customer.affiliate}: {self.worker.name} - {self.customer.name} ({self.start_time})"
 
     def save(self, hourly_rate=20, *args, **kwargs):
         seconds = float(self.hours * 3600)
