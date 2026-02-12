@@ -1,5 +1,5 @@
 import csv
-from datetime import time
+import time
 import io
 import httpx
 from django.core.management.base import BaseCommand
