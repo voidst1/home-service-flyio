@@ -4,94 +4,92 @@
 
 
 
-<h1>New Booking</h1>
-<h2>{{ postal_code }}</h2>
+<h1>New Booking for {{postal_code}}</h1>
 
 
 
 
+    <br>
+    <br>
 
 <div x-data="listing">
+    <h2 class="text-xl font-semibold mb-4">Choose your preferred cleaning duration</h2>
 
-
-
-
-
-<h2 class="text-xl font-semibold mb-4">Choose your preferred cleaning duration</h2>
-
-<div class="flex flex-nowrap w-full overflow-x-auto gap-4">
-    {% for c_hour, c_description in choices_hours %}
-    <div class="flex-1 bg-white rounded-xl p-6 border-2 transition-all hover:border-blue-500 hover:shadow-md text-left border-gray-200 cursor-pointer"
-         :class="{ 'border-blue-500 shadow-md': selectedHour == {{ c_hour}} }"
-          @click="selectedHour = {{c_hour}}">
-        <div class="flex justify-between items-start">
-            <div class="flex-1">
-                <h3 class="text-2xl font-bold mb-1">{{c_hour}} Hours</h3>
-                <p class="text-gray-600">{{c_description}}</p>
-            </div>
-            <div class="text-right">
-                <div class="text-3xl font-bold">$30/hr</div>
-                <div class="text-sm text-gray-500">($32.70 w/GST)
+    <div class="flex flex-nowrap w-full overflow-x-auto gap-4">
+        {% for c_hour, c_description in choices_hours %}
+        <div class="flex-1 bg-white rounded-xl p-6 border-2 transition-all hover:border-blue-500 hover:shadow-md text-left border-gray-200 cursor-pointer"
+            :class="{ '!border-blue-500 shadow-md': selectedHour == {{ c_hour }} }" @click="selectedHour = {{c_hour}}">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <h3 class="text-2xl font-bold mb-1">{{c_hour}} Hours</h3>
+                    <p class="text-gray-600">{{c_description}}</p>
                 </div>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-
-
-    <div class="form-row">
-        <div class="form-group col-md-2">
-            <label for="date">Date</label>
-            <select name="date" class="form-control form-select" x-model="selectedDate">
-                {% for d in choices_dates %}
-                <option value="{{ d.0 }}">{{ d.1 }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    </div>
-    <div class="row">
-        <template
-            x-for="item in items.filter(i => i.hours == selectedHour && (selectedDate == 'all' || selectedDate == i.date_str)).sort((a, b) => a.ts - b.ts)"
-            :key="item.ts + '-' + item.hours + '-' + item.wid">
-            <div class="col-sm-3 mt-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title" x-text="item.date_str"></h5>
-                        <p class="card-text" x-text="item.start_time + ' - ' + item.end_time"></p>
-                        <p class="card-text" x-text="'$'+item.price"></p>
-
-                        <form method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="wid" x-model="item.wid">
-                            <input type="hidden" name="start_time" x-model="item.ts">
-                            <input type="hidden" name="hours" x-model="item.hours">
-                            <input type="submit" name="submit" value="Book" class="btn btn-primary btn btn-primary"
-                                id="submit-id-submit">
-                        </form>
+                <div class="text-right">
+                    <div class="text-3xl font-bold">$30/hr</div>
+                    <div class="text-sm text-gray-500">($32.70 w/GST)
                     </div>
                 </div>
             </div>
-        </template>
+        </div>
+        {% endfor %}
+    </div>
+
+    <br>
+    <br>
+
+
+
+    <div class="container text-center">
+        <div class="row">
+            {% for d in dates %}
+            <div class="col-auto">
+                <div>{{d}}</div>
+                <div>
+                    <template
+                        x-for="item in items.filter(i => i.hours == selectedHour && i.date_str === '{{d}}').sort((a, b) => a.ts - b.ts)"
+                        :key="item.ts + '-' + item.hours + '-' + item.wid">
+                        <div class="mt-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title" x-text="item.start_time + ' - ' + item.end_time"></h5>
+                                    <p class="card-text" x-text="'$'+item.price"></p>
+
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="wid" x-model="item.wid">
+                                        <input type="hidden" name="start_time" x-model="item.ts">
+                                        <input type="hidden" name="hours" x-model="item.hours">
+                                        <input type="submit" name="submit" value="Book"
+                                            class="btn btn-primary btn btn-primary" id="submit-id-submit">
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
 
-<button x-data x-on:click="alert('Hello from Alpine.js!')">
-  Show Alert
-</button>
 
 
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('listing', () => ({
-            //choicesHours: {{ choices_hours| safe }},
-        selectedHour: null,//{{ choices_hours.0.0 }},
-        choicesDates: {{ choices_dates| safe}},
-        selectedDate: 'all',
-        items: {{ slots| safe }}, // if length is 0, show no available slots
+
+
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('listing', () => ({
+                //choicesHours: {{ choices_hours| safe }},
+                selectedHour: null,//{{ choices_hours.0.0 }},
+                choicesDates: {{ choices_dates| safe}},
+            dates: {{ dates| safe}},
+            selectedDate: 'all',
+            items: {{ slots| safe }}, // if length is 0, show no available slots
         }))
     })
-</script>
+    </script>
 
-{% endblock %}
+    {% endblock %}

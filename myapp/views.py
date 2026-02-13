@@ -174,12 +174,15 @@ def bookings_new_view(request):
 
     context['slots'] = slots
     context['choices_dates'] = [('all', 'All')]
+    context['dates'] = []
 
     for slot in slots:
         date_str = slot['date_str']
         exists = any(tup[0] == date_str for tup in context['choices_dates'])
         if not exists:
             context['choices_dates'].append((date_str, date_str))
+            context['dates'].append(date_str)
+
 
     return render(request, 'bookings_new.html', context)
 
