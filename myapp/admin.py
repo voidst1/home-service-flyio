@@ -77,7 +77,6 @@ class AffiliateAdmin(admin.ModelAdmin):
     inlines = [CustomerInline]
 
 
-'''
 @admin.register(WorkerWeeklySchedule)
 class WorkerWeeklyScheduleAdmin(admin.ModelAdmin):
     list_display = [
@@ -91,8 +90,6 @@ class WorkerWeeklyScheduleAdmin(admin.ModelAdmin):
         'thursday_location',
         'friday_location',
     ]
-'''
-
 
 class WorkerWeeklyScheduleTabularInline(admin.TabularInline):
     model = WorkerWeeklySchedule
