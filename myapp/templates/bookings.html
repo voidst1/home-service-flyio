@@ -28,6 +28,8 @@
                 <h5 class="card-title">{{ appointment.start_time|date:"j M Y (D)" }}</h5>
                 <p class="card-text">{{ appointment.start_time|time:"g:i A" }} - {{ appointment.end_time|time:"g:i A" }}</p>
                 <p class="card-text">${{ appointment.price }}</p>
+                <p class="card-text">Status: {{ appointment.status }}</p>
+                <p class="card-text">Paid: {{ appointment.paid }}</p>
             </div>
         </div>
     </div>

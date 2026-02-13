@@ -1,14 +1,15 @@
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.utils import timezone
 from .forms import CustomerForm, BookSlotForm, NewCustomerForm
 from .models import Appointment, AssignedLocation, Worker
 from .decorators import onboarding_required
-from .utils import get_user_context
+from .utils import generate_available_slots, get_user_context, get_workers_by_train_station_day
 from django.urls import reverse
 from urllib.parse import urlencode
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 
 def default_bookings_choose_date_url():
@@ -42,7 +43,7 @@ def home_view(request):
     #    context['username'] = request.user.username
     # return render(request, 'home.html', context)
 
-
+@login_required
 def onboarding_view(request):
     return redirect('onboarding_profile')
 
@@ -59,7 +60,7 @@ def onboarding_profile_view(request):
 
     return render(request, 'onboarding_profile.html', {'form': form})
 
-
+@login_required
 @onboarding_required
 def profile_view(request):
     context = get_user_context(request.user)
@@ -81,13 +82,13 @@ def profile_view(request):
 
 # views below require onboarding
 
-
+@login_required
 @onboarding_required
 def book_slot_view(request):
     context = get_user_context(request.user)
     return render(request, 'book_slot.html', context)
 
-
+@login_required
 @onboarding_required
 def bookings_view(request):
     context = get_user_context(request.user)
@@ -97,10 +98,11 @@ def bookings_view(request):
 
     return render(request, 'bookings.html', context)
 
-
+@login_required
 @onboarding_required
 def bookings_new_view(request):
     context = get_user_context(request.user)
+    context['postal_code'] = request.user.customer_profile.postal_code
     context['choices_hours'] = Appointment.HOURS_CHOICES
 
     if request.method == 'POST':
@@ -110,26 +112,78 @@ def bookings_new_view(request):
         start_time = datetime.fromtimestamp(int(start_time))
         hours = request.POST.get('hours')
         hours = float(hours)
-        a_id = request.POST.get('aid')
-        a_id = int(a_id)
+        w_id = request.POST.get('wid')
+        w_id = int(w_id)
         print(f'start_time: {start_time}')
         print(f'hours: {hours}')
-        print(f'a_id: {a_id}')
+        print(f'w_id: {w_id}')
 
+        '''
         al = AssignedLocation.objects.get(id=a_id)
         worker = al.worker
-
+        '''
         new_appointment = Appointment(
-            start_time=start_time, hours=hours, customer=request.user.customer_profile, worker=worker)
-
+            start_time=start_time, hours=hours,
+            customer=request.user.customer_profile, worker_id=w_id)
         try:
-            new_appointment.save(hourly_rate=al.hourly_rate)
+            new_appointment.save()
             messages.success(request, 'Appointment booked.')
             return redirect('bookings')
 
         except Exception as e:
             messages.error(request, str(e), 'danger')
 
+
+    train_station_postal_code_distances = request.user.customer_profile.postal_code.train_station_postal_code_distance.filter(distance_km__lt=1.5).order_by('distance_km')
+    nearest_train_stations = [o.train_station for o in train_station_postal_code_distances]
+
+    slots = []
+
+    # Weekly Schedule
+    today = date.today()
+    for i in range(7):
+        current_date = today + timedelta(days=i)
+        print(current_date)
+        print(current_date.weekday())
+        print(current_date.strftime('%A'))
+
+        # get workers available for the day
+        workers = []
+        for train_station in nearest_train_stations:
+            workers += list(get_workers_by_train_station_day(train_station, current_date.weekday()))
+        workers = list(set(workers)) # dedup
+        print(workers)
+
+        for worker in workers:
+            appointments_taken = list(worker.appointments.filter(start_time__date=current_date))
+            print(f'appointment-taken: {appointments_taken}')
+            # generate free slots
+            free_slots = generate_available_slots(current_date, appointments_taken)
+            for slot in free_slots:
+                date_str = datetime.strftime(slot['start_time'], "%-d %b %Y (%a)")
+                slots.append({
+                    'wid': worker.pk,#slot['assigned_location_id'],
+                    'ts': int(slot['start_time'].timestamp()),
+                    'date': datetime.strftime(slot['start_time'], "%d-%m-%Y"),
+                    'date_str': date_str,
+                    'start_time': datetime.strftime(slot['start_time'], "%-I:%M%P"),
+                    'end_time': datetime.strftime(slot['end_time'], "%-I:%M%P"),
+                    'hours': slot['hours'],
+                    'price': slot['price']
+                })
+
+    context['slots'] = slots
+    context['choices_dates'] = [('all', 'All')]
+
+    for slot in slots:
+        date_str = slot['date_str']
+        exists = any(tup[0] == date_str for tup in context['choices_dates'])
+        if not exists:
+            context['choices_dates'].append((date_str, date_str))
+
+    return render(request, 'bookings_new.html', context)
+
+    '''
     if True:
         now = timezone.now()
         date_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -179,8 +233,9 @@ def bookings_new_view(request):
             })
 
         return render(request, 'bookings_new.html', context)
+    '''
 
-
+@login_required
 @onboarding_required
 def bookings_choose_date_view(request):
     context = get_user_context(request.user)
@@ -220,7 +275,7 @@ def bookings_choose_date_view(request):
 
     return render(request, 'bookings_choose_date.html', context)
 
-
+@login_required
 @onboarding_required
 def bookings_choose_slot_view(request):
     context = get_user_context(request.user)
@@ -344,6 +399,7 @@ def bookings_choose_slot_view(request):
 
         return render(request, 'bookings_choose_slot.html', context)
 
+@login_required
 @onboarding_required
 def customers_view(request):
     context = get_user_context(request.user)

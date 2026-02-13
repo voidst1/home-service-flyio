@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta
 import uuid
 import zoneinfo
 from django.db import models, transaction
@@ -51,6 +51,17 @@ class WorkerWeeklySchedule(models.Model):
         related_name='weekly_schedules_friday',
         blank=True, null=True,
         verbose_name='Friday')
+    saturday_location = models.ForeignKey(
+        TrainStation, on_delete=models.SET_NULL,
+        related_name='weekly_schedules_saturday',
+        blank=True, null=True,
+        verbose_name='Saturday')
+    sunday_location = models.ForeignKey(
+        TrainStation, on_delete=models.SET_NULL,
+        related_name='weekly_schedules_sunday',
+        blank=True, null=True,
+        verbose_name='Sunday')
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -131,18 +142,21 @@ class Appointment(models.Model):
     ]
 
     INTERVAL_BREAK_HOUR = 1
+    HOURLY_RATE = 20
 
     HOURS_CHOICES = [
-        (3, str(3)),
-        (3.5, str(3.5)),
-        (4, str(4)),
+        (3, "Suitable for smaller spaces"),
+        (3.5, "Balanced option for medium spaces"),
+        (4, "Recommended for up to 2 bedrooms"),
     ]
 
     # include 0830?
-    def get_start_time_choices(date:datetime):
-        date_obj = date.replace(hour=0, minute=0,second=0,microsecond=0)
-        date_obj = timezone.localtime(date_obj)
-        print(date_obj)
+    def get_start_time_choices(date:date):
+        #date_obj = date.replace(hour=0, minute=0,second=0,microsecond=0)
+        #date_obj = timezone.localtime(date_obj)
+        #print(date_obj)
+        date_obj = datetime.combine(date, time.min)
+        date_obj = timezone.make_aware(date_obj)
         return [
             date_obj.replace(hour=8), # morning
             date_obj.replace(hour=9), # morning
@@ -185,7 +199,7 @@ class Appointment(models.Model):
     def __str__(self):
         return f"{self.customer.affiliate}: {self.worker.name} - {self.customer.name} ({self.start_time})"
 
-    def save(self, hourly_rate=20, *args, **kwargs):
+    def save(self, hourly_rate=HOURLY_RATE, *args, **kwargs):
         seconds = float(self.hours * 3600)
         self.end_time = self.start_time + timedelta(seconds=seconds)
         self.price = self.hours * hourly_rate

@@ -40,7 +40,8 @@ class Command(BaseCommand):
                 postal_code_obj, created = PostalCode.objects.get_or_create(
                     name=postal_code,
                 )
-                time.sleep(0.1)
+                if created:
+                    time.sleep(0.1)
             except Exception as e:
                 print(f"An error occurred: {e}") 
                 break

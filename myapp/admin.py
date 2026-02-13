@@ -42,7 +42,6 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display = ['id', 'affiliate', 'name',
                     'phone_number', 'road_name', 'unit_number', 'postal_code']
     fields = [
-        'affiliate',
         'user',
         'name',
         'email_address',
@@ -53,6 +52,7 @@ class CustomerAdmin(admin.ModelAdmin):
         'postal_code',
         'address',
         'frequency',
+        'affiliate',
     ]
     readonly_fields = ['road_name', 'address']
     inlines = [AppointmentInline]
@@ -96,10 +96,16 @@ class WorkerWeeklyScheduleAdmin(admin.ModelAdmin):
 
 class WorkerWeeklyScheduleTabularInline(admin.TabularInline):
     model = WorkerWeeklySchedule
+    
+    def has_add_permission(self, request, obj=None): return False
+    def has_delete_permission(self, request, obj=None): return False
 
 
 class WorkerWeeklyScheduleStackedInline(admin.StackedInline):
     model = WorkerWeeklySchedule
+
+    def has_add_permission(self, request, obj=None): return False
+    def has_delete_permission(self, request, obj=None): return False
 
 
 '''

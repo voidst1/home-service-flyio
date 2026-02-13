@@ -6,7 +6,7 @@ authors = [
     {name = "JS",email = "dev@voidst.one"}
 ]
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.14,<4.0"
 dependencies = [
     "django (>=6.0.1,<7.0.0)",
     "django-allauth (>=65.14.0,<66.0.0)",
@@ -16,6 +16,7 @@ dependencies = [
     "httpx (>=0.28.1,<0.29.0)",
     "haversine (>=2.9.0,<3.0.0)",
     "django-auditlog (>=3.4.1,<4.0.0)",
+    "django-tailwind-cli (>=4.5.1,<5.0.0)",
 ]
 
 

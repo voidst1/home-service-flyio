@@ -14,7 +14,7 @@ class BookingHoursForm(forms.Form):
 class NewCustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
-        exclude = ['affiliate', 'user']
+        exclude = ['affiliate', 'user', 'preferred_worker']
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

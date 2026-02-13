@@ -1,28 +1,220 @@
-{% extends "base.html" %}
+<!doctype html>
+<html lang="en">
 
-{% block content %}
-<nav class="navbar">
-  {% if user.is_authenticated %}
-  <main role="main" class="container">
-    <h1 class="mt-5">Welcome {{ user.username}}</h1>
-  </main>
-  {% else %}
-  <main role="main">
-    <section class="jumbotron text-center">
-      <div class="container">
-        <h1 class="jumbotron-heading">Book a Cleaner for $20/hour</h1>
-        <p class="lead text-muted">
-          Modern Japanese-Style Housekeeping Trusted by 10,000+ Local Homeowners. Book our Home Masters for only
-          $20/hour.
-        </p>
-        <p>
-          <a href="{% url 'account_login' %}" class="btn btn-primary my-2">Login</a>
-          <a href="{% url 'account_signup' %}" class="btn btn-secondary my-2">Sign Up</a>
-        </p>
-      </div>
-    </section>
-  </main>
-  {% endif %}
-</nav>
+<head>
+  {% block title %}
+  <title>Home Master</title>
+  {% endblock %}
+  <link rel="stylesheet" crossorigin="" href="/static/index-XOiIGw1Y.css">
+</head>
 
-{% endblock %}
+<body>
+  <div id="root">
+    <section aria-label="Notifications alt+T" tabindex="-1" aria-live="polite" aria-relevant="additions text"
+      aria-atomic="false"></section>
+    <div data-loc="client/src/pages/Home.tsx:10" class="min-h-screen">
+      <section data-loc="client/src/pages/Home.tsx:12"
+        class="bg-gradient-to-br from-blue-50 via-white to-orange-50 py-20">
+        <div data-loc="client/src/pages/Home.tsx:13" class="container">
+          <div data-loc="client/src/pages/Home.tsx:14" class="grid lg:grid-cols-2 gap-12 items-center">
+            <div data-loc="client/src/pages/Home.tsx:15" class="space-y-6">
+              <h1 data-loc="client/src/pages/Home.tsx:16" class="text-5xl lg:text-6xl font-bold leading-tight">The help
+                you need at your <span data-loc="client/src/pages/Home.tsx:18" class="text-primary">fingertips</span>
+              </h1>
+              <p data-loc="client/src/pages/Home.tsx:20" class="text-xl text-muted-foreground">Professional home
+                cleaning services with real-time availability. Book instantly and get matched with experienced workers
+                in your area.</p>
+              <div data-loc="client/src/pages/Home.tsx:24" class="flex flex-col sm:flex-row gap-4">
+                <a href="{% url 'bookings_new' %}"><button
+                  data-loc="client/src/pages/Home.tsx:25" data-slot="button"
+                  class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground rounded-md has-[&gt;svg]:px-4 h-14 px-8 text-lg bg-primary hover:bg-primary/90 shadow-lg">Book
+                  a Service</button></a>
+                 
+                  <a href="#more-info">
+                  <button data-loc="client/src/pages/Home.tsx:32" data-slot="button"
+                  class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-transparent shadow-xs hover:bg-accent dark:bg-transparent dark:border-input dark:hover:bg-input/50 rounded-md has-[&gt;svg]:px-4 h-14 px-8 text-lg">Learn
+                  More</button></div></a>
+                
+                </div>
+              <div data-loc="client/src/pages/Home.tsx:38" class="grid grid-cols-3 gap-6 pt-8">
+                <div data-loc="client/src/pages/Home.tsx:39">
+                  <div data-loc="client/src/pages/Home.tsx:40" class="text-3xl font-bold text-primary">500+</div>
+                  <div data-loc="client/src/pages/Home.tsx:41" class="text-sm text-muted-foreground">Customers Served
+                  </div>
+                </div>
+                <div data-loc="client/src/pages/Home.tsx:43">
+                  <div data-loc="client/src/pages/Home.tsx:44" class="text-3xl font-bold text-primary">1,200+</div>
+                  <div data-loc="client/src/pages/Home.tsx:45" class="text-sm text-muted-foreground">Sessions Annually
+                  </div>
+                </div>
+                <div data-loc="client/src/pages/Home.tsx:47">
+                  <div data-loc="client/src/pages/Home.tsx:48" class="text-3xl font-bold text-primary">4.9★</div>
+                  <div data-loc="client/src/pages/Home.tsx:49" class="text-sm text-muted-foreground">Average Rating
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div data-loc="client/src/pages/Home.tsx:54" class="relative">
+              <div data-loc="client/src/pages/Home.tsx:55" class="bg-white rounded-2xl shadow-2xl p-8"><img
+                  data-loc="client/src/pages/Home.tsx:56" alt="Professional cleaner" class="rounded-lg w-full"
+                  src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&amp;h=400&amp;fit=crop"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section data-loc="client/src/pages/Home.tsx:68" class="py-20 bg-white" id="more-info">
+        <div data-loc="client/src/pages/Home.tsx:69" class="container">
+          <div data-loc="client/src/pages/Home.tsx:70" class="text-center mb-16">
+            <h2 data-loc="client/src/pages/Home.tsx:71" class="text-4xl font-bold mb-4">How it works</h2>
+            <p data-loc="client/src/pages/Home.tsx:72" class="text-xl text-muted-foreground">Simple, fast, and
+              transparent booking process</p>
+          </div>
+          <div data-loc="client/src/pages/Home.tsx:77" class="grid md:grid-cols-4 gap-8">
+            <div data-loc="client/src/pages/Home.tsx:104" data-slot="card"
+              class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-6 text-center hover:shadow-lg transition-shadow">
+              <div data-loc="client/src/pages/Home.tsx:105"
+                class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-map-pin w-6 h-6 text-primary" data-loc="client/src/pages/Home.tsx:106">
+                  <path
+                    d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0">
+                  </path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg></div>
+              <div data-loc="client/src/pages/Home.tsx:108" class="text-sm font-semibold text-primary mb-2">01</div>
+              <h3 data-loc="client/src/pages/Home.tsx:109" class="text-xl font-bold mb-2">Enter Location</h3>
+              <p data-loc="client/src/pages/Home.tsx:110" class="text-muted-foreground">Tell us your postal code to
+                check service availability</p>
+            </div>
+            <div data-loc="client/src/pages/Home.tsx:104" data-slot="card"
+              class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-6 text-center hover:shadow-lg transition-shadow">
+              <div data-loc="client/src/pages/Home.tsx:105"
+                class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-calendar w-6 h-6 text-primary" data-loc="client/src/pages/Home.tsx:106">
+                  <path d="M8 2v4"></path>
+                  <path d="M16 2v4"></path>
+                  <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                  <path d="M3 10h18"></path>
+                </svg></div>
+              <div data-loc="client/src/pages/Home.tsx:108" class="text-sm font-semibold text-primary mb-2">02</div>
+              <h3 data-loc="client/src/pages/Home.tsx:109" class="text-xl font-bold mb-2">Pick Date &amp; Time</h3>
+              <p data-loc="client/src/pages/Home.tsx:110" class="text-muted-foreground">View real-time availability and
+                choose your preferred slot</p>
+            </div>
+            <div data-loc="client/src/pages/Home.tsx:104" data-slot="card"
+              class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-6 text-center hover:shadow-lg transition-shadow">
+              <div data-loc="client/src/pages/Home.tsx:105"
+                class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-clock w-6 h-6 text-primary" data-loc="client/src/pages/Home.tsx:106">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg></div>
+              <div data-loc="client/src/pages/Home.tsx:108" class="text-sm font-semibold text-primary mb-2">03</div>
+              <h3 data-loc="client/src/pages/Home.tsx:109" class="text-xl font-bold mb-2">Select Duration</h3>
+              <p data-loc="client/src/pages/Home.tsx:110" class="text-muted-foreground">Choose between 3 or 4 hour
+                service packages</p>
+            </div>
+            <div data-loc="client/src/pages/Home.tsx:104" data-slot="card"
+              class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-6 text-center hover:shadow-lg transition-shadow">
+              <div data-loc="client/src/pages/Home.tsx:105"
+                class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-circle-check w-6 h-6 text-primary" data-loc="client/src/pages/Home.tsx:106">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="m9 12 2 2 4-4"></path>
+                </svg></div>
+              <div data-loc="client/src/pages/Home.tsx:108" class="text-sm font-semibold text-primary mb-2">04</div>
+              <h3 data-loc="client/src/pages/Home.tsx:109" class="text-xl font-bold mb-2">Confirm Booking</h3>
+              <p data-loc="client/src/pages/Home.tsx:110" class="text-muted-foreground">Get instant confirmation and
+                worker assignment</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section data-loc="client/src/pages/Home.tsx:118" class="py-20 bg-gradient-to-br from-blue-50 to-white">
+        <div data-loc="client/src/pages/Home.tsx:119" class="container">
+          <div data-loc="client/src/pages/Home.tsx:120" class="text-center mb-16">
+            <h2 data-loc="client/src/pages/Home.tsx:121" class="text-4xl font-bold mb-4">Why choose us</h2>
+            <p data-loc="client/src/pages/Home.tsx:122" class="text-xl text-muted-foreground">Professional service you
+              can trust</p>
+          </div>
+          <div data-loc="client/src/pages/Home.tsx:127" class="grid md:grid-cols-3 gap-8">
+            <div data-loc="client/src/pages/Home.tsx:148" data-slot="card"
+              class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-8 hover:shadow-xl transition-shadow">
+              <div data-loc="client/src/pages/Home.tsx:149"
+                class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-star w-8 h-8 text-primary" data-loc="client/src/pages/Home.tsx:150">
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                  </polygon>
+                </svg></div>
+              <h3 data-loc="client/src/pages/Home.tsx:152" class="text-2xl font-bold mb-4">Experienced Workers</h3>
+              <p data-loc="client/src/pages/Home.tsx:153" class="text-muted-foreground">All our workers are
+                professionally trained with years of experience</p>
+            </div>
+            <div data-loc="client/src/pages/Home.tsx:148" data-slot="card"
+              class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-8 hover:shadow-xl transition-shadow">
+              <div data-loc="client/src/pages/Home.tsx:149"
+                class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-clock w-8 h-8 text-primary" data-loc="client/src/pages/Home.tsx:150">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg></div>
+              <h3 data-loc="client/src/pages/Home.tsx:152" class="text-2xl font-bold mb-4">Real-Time Availability</h3>
+              <p data-loc="client/src/pages/Home.tsx:153" class="text-muted-foreground">See available time slots
+                instantly and book without waiting</p>
+            </div>
+            <div data-loc="client/src/pages/Home.tsx:148" data-slot="card"
+              class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-8 hover:shadow-xl transition-shadow">
+              <div data-loc="client/src/pages/Home.tsx:149"
+                class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-map-pin w-8 h-8 text-primary" data-loc="client/src/pages/Home.tsx:150">
+                  <path
+                    d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0">
+                  </path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg></div>
+              <h3 data-loc="client/src/pages/Home.tsx:152" class="text-2xl font-bold mb-4">Smart Matching</h3>
+              <p data-loc="client/src/pages/Home.tsx:153" class="text-muted-foreground">Automatically matched with the
+                best worker for your location and time</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section data-loc="client/src/pages/Home.tsx:161" class="py-20 bg-primary text-white">
+        <div data-loc="client/src/pages/Home.tsx:162" class="container text-center">
+          <h2 data-loc="client/src/pages/Home.tsx:163" class="text-4xl font-bold mb-4">Ready to book your service?</h2>
+          <p data-loc="client/src/pages/Home.tsx:164" class="text-xl mb-8 opacity-90">Get started in just a few clicks.
+            No upfront payment required.</p>
+            <a href="{% url 'bookings_new' %}">
+            <button data-loc="client/src/pages/Home.tsx:167" data-slot="button"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive rounded-md has-[&gt;svg]:px-4 h-14 px-12 text-lg bg-white text-primary hover:bg-gray-100">Book
+            Now</button></a>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</body>
+{# Load the tag library #}
+{% load django_bootstrap5 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+</html>
