@@ -77,6 +77,7 @@ class AffiliateAdmin(admin.ModelAdmin):
     inlines = [CustomerInline]
 
 
+'''
 @admin.register(WorkerWeeklySchedule)
 class WorkerWeeklyScheduleAdmin(admin.ModelAdmin):
     list_display = [
@@ -89,7 +90,10 @@ class WorkerWeeklyScheduleAdmin(admin.ModelAdmin):
         'wednesday_location',
         'thursday_location',
         'friday_location',
+        'saturday_location',
+        'sunday_location',
     ]
+'''
 
 class WorkerWeeklyScheduleTabularInline(admin.TabularInline):
     model = WorkerWeeklySchedule
@@ -123,6 +127,8 @@ class WorkerAdmin(admin.ModelAdmin):
         'wednesday',
         'thursday',
         'friday',
+        'saturday',
+        'sunday'
     ]
 
     @admin.display(description='Monday')
@@ -144,6 +150,14 @@ class WorkerAdmin(admin.ModelAdmin):
     @admin.display(description='Friday')
     def friday(self, obj):
         return f"{obj.weekly_schedule.friday_location}"
+
+    @admin.display(description='Saturday')
+    def saturday(self, obj):
+        return f"{obj.weekly_schedule.saturday_location}"
+
+    @admin.display(description='Sunday')
+    def sunday(self, obj):
+        return f"{obj.weekly_schedule.sunday_location}"
 
     inlines = [
         WorkerWeeklyScheduleStackedInline,
