@@ -9,8 +9,8 @@
 
 
 
-    <br>
-    <br>
+<br>
+<br>
 
 <div x-data="listing">
     <h2 class="text-xl font-semibold mb-4">Choose your preferred cleaning duration</h2>
@@ -37,13 +37,20 @@
     <br>
     <br>
 
-
-
-    <div class="container text-center">
+    <div class="container text-center" :class="{ 'hidden': !selectedHour }">
         <div class="row">
-            {% for d in dates %}
+            {% for d, d1, d2 in dates %}
             <div class="col-auto">
-                <div>{{d}}</div>
+
+                <div class="flex-shrink-0 px-6 py-2 transition-all">
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500 mb-1">{{d1}}</div>
+                        <div class="text-lg font-bold ">{{ d2 }}</div>
+                    </div>
+                </div>
+
+
+                <hr>
                 <div>
                     <template
                         x-for="item in items.filter(i => i.hours == selectedHour && i.date_str === '{{d}}').sort((a, b) => a.ts - b.ts)"
@@ -79,17 +86,19 @@
 
 
 
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('listing', () => ({
-                //choicesHours: {{ choices_hours| safe }},
-                selectedHour: null,//{{ choices_hours.0.0 }},
-                choicesDates: {{ choices_dates| safe}},
-            dates: {{ dates| safe}},
-            selectedDate: 'all',
-            items: {{ slots| safe }}, // if length is 0, show no available slots
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('listing', () => ({
+            //choicesHours: {{ choices_hours| safe }},
+            selectedHour: null,//{{ choices_hours.0.0 }},
+            choicesDates: {{ choices_dates| safe}},
+            //shortDates: {{ short_dates }},
+            //shortDays: {{ short_days }},
+        dates: {{ dates| safe}},
+        selectedDate: 'all',
+        items: {{ slots| safe }}, // if length is 0, show no available slots
         }))
     })
-    </script>
+</script>
 
-    {% endblock %}
+{% endblock %}

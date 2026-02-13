@@ -165,6 +165,8 @@ def bookings_new_view(request):
                     'wid': worker.pk,#slot['assigned_location_id'],
                     'ts': int(slot['start_time'].timestamp()),
                     'date': datetime.strftime(slot['start_time'], "%d-%m-%Y"),
+                    'short_date': datetime.strftime(slot['start_time'], "%d %b"),
+                    'short_day': datetime.strftime(slot['start_time'], "%a"),
                     'date_str': date_str,
                     'start_time': datetime.strftime(slot['start_time'], "%-I:%M%P"),
                     'end_time': datetime.strftime(slot['end_time'], "%-I:%M%P"),
@@ -181,7 +183,7 @@ def bookings_new_view(request):
         exists = any(tup[0] == date_str for tup in context['choices_dates'])
         if not exists:
             context['choices_dates'].append((date_str, date_str))
-            context['dates'].append(date_str)
+            context['dates'].append([date_str, slot['short_day'], slot['short_date']])
 
 
     return render(request, 'bookings_new.html', context)
