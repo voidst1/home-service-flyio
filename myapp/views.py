@@ -1,7 +1,10 @@
 from datetime import datetime, date, timedelta
+from decimal import Decimal
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
+
+from postal_codes.models import PostalCode
 from .forms import CustomerForm, BookSlotForm, NewCustomerForm
 from .models import Appointment, AssignedLocation, Worker
 from .decorators import onboarding_required
@@ -10,6 +13,8 @@ from django.urls import reverse
 from urllib.parse import urlencode
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+
+from django.core.exceptions import ValidationError
 
 
 def default_bookings_choose_date_url():
@@ -409,3 +414,68 @@ def bookings_choose_slot_view(request):
 def customers_view(request):
     context = get_user_context(request.user)
     return render(request, 'customers.html', context)
+
+
+
+def api_available_slots(request, postal_code, hours):
+    # quick validation
+    if postal_code < 100000 or postal_code > 999999:
+        return JsonResponse({'error': 'Invalid postal code.'}, status=400)
+
+    try:
+        postal_code, created = PostalCode.objects.get_or_create(name=postal_code)
+    except ValidationError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+    try:
+        hours_decimal = Decimal(hours)
+        matches = [h for h in Appointment.HOURS_CHOICES if h[0] == hours_decimal]
+        if not matches:
+            return JsonResponse({'error': 'Invalid hours.'}, status=400)
+    except:
+        return JsonResponse({'error': 'Invalid hours.'}, status=400)
+    
+
+    train_station_postal_code_distances = postal_code.train_station_postal_code_distance.filter(distance_km__lt=2).order_by('distance_km')
+    nearest_train_stations = [o.train_station for o in train_station_postal_code_distances]
+
+
+    slots = []
+
+    # Weekly Schedule
+    today = date.today()
+    for i in range(7):
+        current_date = today + timedelta(days=i)
+        print(current_date)
+        print(current_date.weekday())
+        print(current_date.strftime('%A'))
+
+        # get workers available for the day
+        workers = []
+        for train_station in nearest_train_stations:
+            workers += list(get_workers_by_train_station_day(train_station, current_date.weekday()))
+        workers = list(set(workers)) # dedup
+        print(workers)
+
+        for worker in workers:
+            appointments_taken = list(worker.appointments.filter(start_time__date=current_date))
+            print(f'appointment-taken: {appointments_taken}')
+            # generate free slots
+            free_slots = generate_available_slots(current_date, appointments_taken)
+            for slot in free_slots:
+                date_str = datetime.strftime(slot['start_time'], "%-d %b %Y (%a)")
+                slots.append({
+                    'wid': worker.pk, #slot['assigned_location_id'],
+                    'ts': int(slot['start_time'].timestamp()),
+                    'date': datetime.strftime(slot['start_time'], "%d-%m-%Y"),
+                    'short_date': datetime.strftime(slot['start_time'], "%d %b"),
+                    'short_day': datetime.strftime(slot['start_time'], "%a"),
+                    'date_str': date_str,
+                    'start_time': datetime.strftime(slot['start_time'], "%-I:%M%P"),
+                    'end_time': datetime.strftime(slot['end_time'], "%-I:%M%P"),
+                    'hours': slot['hours'],
+                    'price': slot['price']
+                })
+
+    data = {'slots': slots, 'status': 200}
+    return JsonResponse(data)

@@ -31,6 +31,8 @@ from myapp.views import (
     bookings_new_view,
     bookings_choose_date_view,
     bookings_choose_slot_view,
+
+    api_available_slots,
 )
 
 urlpatterns = [
@@ -60,6 +62,9 @@ urlpatterns = [
 
     # customers
     path('customers/', customers_view, name='customers'),
+
+    # api
+    path('api/available_slots/<int:postal_code>/<str:hours>', api_available_slots, name="api_available_slots"),
 
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),

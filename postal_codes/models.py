@@ -34,7 +34,7 @@ class PostalCode(models.Model):
             })
         elif postal_code_result['found'] == 0:
             raise ValidationError({
-                'name': 'Your postal code should be 6 digits long. If it has 5 digits, add a zero at the beginning.'
+                'name': 'Invalid postal code. Your postal code should be 6 digits long. If it has 5 digits, add a zero at the beginning.'
             })
         else:
             result = postal_code_result['results'][0]

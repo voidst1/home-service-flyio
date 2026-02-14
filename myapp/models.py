@@ -169,7 +169,8 @@ class Appointment(models.Model):
     customer = models.ForeignKey(
         Customer,
         on_delete=models.PROTECT,
-        related_name='appointments'
+        related_name='appointments',
+
     )
     worker = models.ForeignKey(
         Worker,
@@ -189,6 +190,13 @@ class Appointment(models.Model):
 
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+
+    # optional fields to handle guests booking without account
+    guest_name = models.CharField(max_length=100, blank=True, null=True)
+    guest_email_address = models.CharField(max_length=200, unique=True, blank=True, null=True)
+    guest_phone_number = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    guest_postal_code = models.ForeignKey(PostalCode, on_delete=models.PROTECT, blank=True, null=True)
+    guest_unit_number = models.CharField(max_length=10, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
