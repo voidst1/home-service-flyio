@@ -417,7 +417,7 @@ def customers_view(request):
 
 
 
-def api_available_slots(request, postal_code, hours):
+def api_available_slots(request, postal_code, hours, date_str):
     # quick validation
     if postal_code < 100000 or postal_code > 999999:
         return JsonResponse({'error': 'Invalid postal code.'}, status=400)
@@ -435,6 +435,14 @@ def api_available_slots(request, postal_code, hours):
     except:
         return JsonResponse({'error': 'Invalid hours.'}, status=400)
     
+    try:
+        parsed_date = datetime.strptime(date_str, "%Y-%m-%d")
+    except ValueError as e:
+        return JsonResponse(
+            {'error': 'Invalid date format', 'message': 'Use YYYY-MM-DD'},
+            status=400
+        )
+
 
     train_station_postal_code_distances = postal_code.train_station_postal_code_distance.filter(distance_km__lt=2).order_by('distance_km')
     nearest_train_stations = [o.train_station for o in train_station_postal_code_distances]
@@ -443,9 +451,8 @@ def api_available_slots(request, postal_code, hours):
     slots = []
 
     # Weekly Schedule
-    today = date.today()
-    for i in range(7):
-        current_date = today + timedelta(days=i)
+    if True:
+        current_date = parsed_date
         print(current_date)
         print(current_date.weekday())
         print(current_date.strftime('%A'))
@@ -467,10 +474,6 @@ def api_available_slots(request, postal_code, hours):
                 slots.append({
                     'wid': worker.pk, #slot['assigned_location_id'],
                     'ts': int(slot['start_time'].timestamp()),
-                    'date': datetime.strftime(slot['start_time'], "%d-%m-%Y"),
-                    'short_date': datetime.strftime(slot['start_time'], "%d %b"),
-                    'short_day': datetime.strftime(slot['start_time'], "%a"),
-                    'date_str': date_str,
                     'start_time': datetime.strftime(slot['start_time'], "%-I:%M%P"),
                     'end_time': datetime.strftime(slot['end_time'], "%-I:%M%P"),
                     'hours': slot['hours'],

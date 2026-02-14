@@ -64,7 +64,7 @@ urlpatterns = [
     path('customers/', customers_view, name='customers'),
 
     # api
-    path('api/available_slots/<int:postal_code>/<str:hours>', api_available_slots, name="api_available_slots"),
+    path('api/available_slots/<int:postal_code>/<str:hours>/<str:date_str>/', api_available_slots, name="api_available_slots"),
 
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
